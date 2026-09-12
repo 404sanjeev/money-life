@@ -21,7 +21,7 @@
   :root {
     /* ink-navy ground, marigold gold accent, banknote teal for player two */
     --bg: #0d1120; --panel: #141a2c; --panel2: #1b2237; --panel3: #222b45; --line: #262e46; --line2: #33405f;
-    --text: #eceef7; --muted: #8f97b3; --faint: #5d6684;
+    --text: #eceef7; --muted: #8f97b3; --faint: #848cab;
     --gold: #f4c95d; --gold-deep: #d9a92f; --gold-ink: #2a2000; --teal: #5cc8e8; --ghostc: #8f97b3;
     --pos: #3fd18f; --neg: #ff6b7a; --warn: #ff9f43; --happy: #b48cff;
     /* aliases kept for inline styles */
@@ -42,7 +42,7 @@
   .muted { color: var(--muted); }
   .num { font-variant-numeric: tabular-nums; }
   h1, h2, .display { font-family: var(--display); font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
-  h3.eyebrow, .eyebrow { margin: 0 0 10px; font: 600 11px/1 var(--body); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+  h3.eyebrow, .eyebrow { margin: 0 0 10px; font: 600 12px/1 var(--body); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
 
   /* ---------- buttons ---------- */
   .primary { background: var(--gold); color: var(--gold-ink); border: 0; border-radius: 12px; padding: 12px 22px; font-weight: 700; font-size: 16px; box-shadow: 0 6px 18px -8px rgba(244, 201, 93, .7); transition: transform .12s, box-shadow .12s, filter .12s; }
@@ -71,13 +71,13 @@
   .how div { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
   .how b { display: block; font-family: var(--display); font-size: 18px; margin-bottom: 4px; }
   .how span { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
-  .intro h3 { margin: 22px 0 10px; font: 600 11px/1 var(--body); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+  .intro h3 { margin: 22px 0 10px; font: 600 12px/1 var(--body); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
   .personas { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
   .personas button { text-align: left; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; transition: border-color .12s, transform .12s, background .12s; }
   .personas button:hover { border-color: var(--line2); transform: translateY(-1px); }
   .personas button.on { border-color: var(--gold); background: linear-gradient(180deg, rgba(244, 201, 93, .12), rgba(244, 201, 93, .03)); }
   .personas b { display: block; font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.2; }
-  .personas .diff { display: block; font: 600 10.5px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 4px 0 6px; }
+  .personas .diff { display: block; font: 600 12px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 4px 0 6px; }
   .personas button.on .diff { color: var(--gold); }
   .personas small { color: var(--muted); display: block; line-height: 1.4; font-size: 12.5px; }
   .startrow { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
@@ -97,8 +97,8 @@
   .tl-fill { position: absolute; left: 0; top: 0; height: 100%; background: linear-gradient(90deg, var(--gold-deep), var(--gold)); border-radius: 3px; transition: width .45s cubic-bezier(.2, .7, .2, 1); }
   .tl-dot { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); border: 3px solid var(--bg); transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--gold); transition: left .45s cubic-bezier(.2, .7, .2, 1); }
   .tl-mark { position: absolute; top: -4px; width: 2px; height: 14px; background: var(--line2); transform: translateX(-50%); }
-  .tl-mark::after { content: attr(data-l); position: absolute; top: 16px; left: 50%; transform: translateX(-50%); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
-  .tl-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tl-mark::after { content: attr(data-l); position: absolute; top: 16px; left: 50%; transform: translateX(-50%); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+  .tl-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--faint); margin-top: 4px; font-variant-numeric: tabular-nums; }
   .agebox { text-align: right; line-height: 1.1; }
   .agebox b { font-family: var(--display); font-size: 40px; font-weight: 700; display: block; }
   .agebox small { color: var(--muted); font-size: 12px; }
@@ -171,7 +171,7 @@
   .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .actions .note { color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
   .actions .btns { display: flex; gap: 8px; }
-  kbd { font: 600 11px/1 var(--body); color: var(--muted); border: 1px solid var(--line2); border-radius: 5px; padding: 2px 5px; margin-left: 6px; vertical-align: middle; }
+  kbd { font: 600 12px/1 var(--body); color: var(--muted); border: 1px solid var(--line2); border-radius: 5px; padding: 2px 5px; margin-left: 6px; vertical-align: middle; }
 
   /* chart */
   .chartwrap { grid-column: 1 / -1; }
@@ -179,11 +179,11 @@
   .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
   .chartbox { position: relative; }
   .chartbox svg { width: 100%; height: 230px; display: block; }
-  .chartbox .ylab { position: absolute; left: 8px; top: 6px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .chartbox .ylab { position: absolute; left: 8px; top: 6px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .chartbox .endlab { position: absolute; transform: translate(-100%, -130%); background: var(--gold); color: var(--gold-ink); font-weight: 700; font-size: 12px; padding: 2px 7px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; pointer-events: none; }
   .chartbox .tip { position: absolute; top: 8px; transform: translateX(-50%); background: var(--panel3); border: 1px solid var(--line2); border-radius: 8px; padding: 5px 9px; font-size: 12px; pointer-events: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .chartbox .tip b { display: block; color: var(--gold); font-size: 11px; } .chartbox .tip span { display: block; color: var(--muted); }
-  .xticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .chartbox .tip b { display: block; color: var(--gold); font-size: 12px; } .chartbox .tip span { display: block; color: var(--muted); }
+  .xticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--faint); margin-top: 4px; font-variant-numeric: tabular-nums; }
   .log { grid-column: 1 / -1; max-height: 220px; overflow: auto; font-size: 13px; }
   .log div { padding: 5px 0; border-bottom: 1px dashed var(--line); color: var(--muted); }
   .log div b { color: var(--text); margin-right: 8px; font-variant-numeric: tabular-nums; }
@@ -205,7 +205,9 @@
   .badge { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 9px 11px; opacity: .4; }
   .badge.got { opacity: 1; border-color: var(--gold); }
   .badge.fresh { box-shadow: 0 0 0 2px var(--happy); }
-  .badge b { display: block; font-size: 13px; } .badge small { color: var(--muted); }
+  .badge b { display: flex; align-items: center; gap: 8px; font-size: 13px; } .badge small { color: var(--muted); display: block; margin-top: 3px; }
+  .badge i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line2); display: grid; place-items: center; font-size: 11px; font-style: normal; font-weight: 800; flex-shrink: 0; }
+  .badge.got i { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
   .overlay { position: fixed; inset: 0; background: rgba(6, 8, 16, .8); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
   .ovbox { background: var(--panel); border: 1px solid var(--line2); border-radius: var(--r); padding: 14px; max-width: 520px; width: 100%; }
   .ovbox img { width: 100%; border-radius: 10px; display: block; margin-bottom: 10px; }
@@ -218,9 +220,9 @@
   @keyframes rise { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
   .agebox b.pop { animation: pop .4s cubic-bezier(.2, .8, .2, 1); }
   @keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.14); color: var(--gold); } 100% { transform: scale(1); } }
-  .quiet { display: inline-block; font: 600 10px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line2); border-radius: 999px; padding: 4px 8px; margin-left: 8px; vertical-align: middle; }
+  .quiet { display: inline-block; font: 600 12px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line2); border-radius: 999px; padding: 4px 8px; margin-left: 8px; vertical-align: middle; }
   /* deltas next to stats */
-  .stat .d { display: block; font-size: 11px; font-weight: 500; color: var(--faint); }
+  .stat .d { display: block; font-size: 12px; font-weight: 500; color: var(--faint); }
   .stat .d.up { color: var(--pos); } .stat .d.dn { color: var(--neg); }
   /* emergency-fund gauge */
   .gauge { display: flex; gap: 3px; margin-top: 5px; }
@@ -238,7 +240,7 @@
   .alloc { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 6px 0 4px; background: var(--panel3); }
   .alloc i { display: block; height: 100%; transition: width .25s; }
   .alloc .eq { background: var(--gold); } .alloc .gd { background: #e0a53a; } .alloc .fd { background: var(--teal); }
-  .alloc-key { display: flex; gap: 12px; font-size: 11px; color: var(--muted); }
+  .alloc-key { display: flex; gap: 12px; font-size: 12px; color: var(--muted); }
   .alloc-key i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
   /* toasts */
   #toasts { position: fixed; top: 14px; right: 14px; z-index: 20; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
@@ -254,16 +256,16 @@
   .numgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
   .endrow { padding-top: 8px; border-top: 1px solid var(--line); }
   @media (max-width: 800px) { .numgrid { grid-template-columns: 1fr; } }
-  .badge .new { float: right; font: 700 9px/1 var(--body); letter-spacing: .1em; color: var(--gold-ink); background: var(--gold); border-radius: 999px; padding: 3px 6px; }
+  .badge .new { float: right; font: 700 12px/1 var(--body); letter-spacing: .1em; color: var(--gold-ink); background: var(--gold); border-radius: 999px; padding: 3px 6px; }
   .story p:first-of-type::first-letter { font-family: var(--display); font-size: 3.1em; font-weight: 700; float: left; line-height: .85; margin: 4px 8px 0 0; color: var(--gold); }
   .diff div { padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 14px; } .diff div:last-child { border-bottom: 0; }
   .rewind { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
   .rewind button { text-align: left; padding: 9px 12px; font-size: 13.5px; }
   .rewind button b { font-family: var(--display); color: var(--gold); margin-right: 8px; font-variant-numeric: tabular-nums; }
-  .rewind button small { display: block; color: var(--faint); font-size: 11.5px; }
+  .rewind button small { display: block; color: var(--faint); font-size: 12px; }
   .cmpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .cmpgrid div { background: var(--panel2); border-radius: 10px; padding: 10px 12px; }
-  .cmpgrid small { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
+  .cmpgrid small { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
   .cmpgrid b { font-family: var(--display); font-size: 34px; display: block; line-height: 1.1; }
   .cmpgrid span { color: var(--muted); font-size: 13px; }
   .diff b { display: inline-block; min-width: 64px; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -299,6 +301,16 @@
 
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
+  /* ---------- touch: 44px targets, 16px base ---------- */
+  @media (pointer: coarse) {
+    body { font-size: 16px; }
+    .seg button, .chips button, .ghost, .primary, .tabs button, .opts button, .personas button, .rewind button, .habits-sum { min-height: 44px; }
+    .chips { gap: 10px; } .seg { gap: 0; }
+    input[type=range] { height: 44px; }
+    input[type=range]::-webkit-slider-thumb { width: 24px; height: 24px; margin-top: -9px; }
+    .toggle { min-height: 44px; } .toggle input { width: 22px; height: 22px; }
+    .startrow input, .more input, .you input, .you select { min-height: 44px; }
+  }
   /* ---------- phone ---------- */
   @media (max-width: 820px) {
     #game { grid-template-columns: 1fr; padding-bottom: 96px; }
@@ -363,10 +375,10 @@
       <button data-m="2">Two players, same luck (take turns)</button>
     </div>
     <h3>Luck seed</h3>
-    <input id="seedIn" placeholder="Optional — same seed, same luck for everyone" style="width:100%;max-width:360px">
+    <input id="seedIn" placeholder="Optional — same seed, same luck for everyone" aria-label="Luck seed" style="width:100%;max-width:360px">
     </details>
     <div class="row startrow">
-      <input id="nameIn" placeholder="Your name" style="width:150px">
+      <input id="nameIn" placeholder="Your name" aria-label="Your name" style="width:150px">
       <span style="margin-left:auto" class="row">
         <button class="ghost hidden" id="btnResume">Continue</button>
         <button class="primary" id="btnStart">Start my life →</button>
@@ -457,13 +469,13 @@
         </div>
         <div class="ctl">
           <label>Invest <b id="investLabel">50%</b> of what's left over</label>
-          <input type="range" id="investPct" min="0" max="100" step="5" value="50">
+          <input type="range" id="investPct" min="0" max="100" step="5" value="50" aria-label="Share of surplus invested">
           <div class="hint">The rest sits in a savings account (~3%, loses to inflation).</div>
         </div>
         <div class="ctl">
           <label>Equity <b id="eqLabel">70%</b> · Gold <b id="goldLabel">10%</b> · FD <b id="fdLabel">20%</b></label>
-          <input type="range" id="equityPct" min="0" max="100" step="10" value="70" title="Equity share">
-          <input type="range" id="goldPct" min="0" max="100" step="10" value="10" title="Gold share">
+          <input type="range" id="equityPct" min="0" max="100" step="10" value="70" title="Equity share" aria-label="Equity share of investments">
+          <input type="range" id="goldPct" min="0" max="100" step="10" value="10" title="Gold share" aria-label="Gold share of investments">
           <div class="alloc"><i class="eq" id="alEq"></i><i class="gd" id="alGd"></i><i class="fd" id="alFd"></i></div>
           <div class="alloc-key"><span><i style="background:var(--gold)"></i>Equity</span><span><i style="background:#e0a53a"></i>Gold</span><span><i style="background:var(--teal)"></i>FD</span></div>
           <div class="hint">Equity MFs ~10% avg, wild swings. Gold ~7%, bumpy. FDs 6.5%, steady.</div>
@@ -493,13 +505,13 @@
       <span><i style="background:var(--gold)"></i>You</span>
       <span><i style="background:var(--ghostc)"></i>Ghost (textbook plan, same luck)</span>
     </div>
-    <div class="chartbox"><svg id="chart" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="ylab"></div><div class="endlab"></div><div class="tip hidden"></div></div>
+    <div class="chartbox"><svg id="chart" viewBox="0 0 1000 230" preserveAspectRatio="none" role="img" aria-label="Net worth by age: you versus the ghost"></svg><div class="ylab"></div><div class="endlab"></div><div class="tip hidden"></div></div>
     <div class="xticks"></div>
   </div>
 
   <div class="panel log" id="log"></div>
 </section>
-<div id="toasts"></div>
+<div id="toasts" aria-live="polite" aria-atomic="false"></div>
 
 <!-- ================= END ================= -->
 <section id="end" class="hidden"></section>
@@ -1698,7 +1710,7 @@ function downloadCard(p, ev) {
   y = cy + ch + 60;
   const story = storyFor(p, ev).slice(1, 4);
   for (const t of story) { y = wrap(t, 90, y, 22, '#c3c7d4', W - 180, 30) + 8; if (y > H - 200) break; }
-  const got = ACHIEVEMENTS.filter(a => { try { return a.test(p, ev); } catch (e) { return false; } }).slice(0, 4).map(a => '🏅 ' + a.name).join('   ');
+  const got = ACHIEVEMENTS.filter(a => { try { return a.test(p, ev); } catch (e) { return false; } }).slice(0, 4).map(a => '✓ ' + a.name).join('   ');
   if (got) txt(got, 90, H - 120, 22, '#e6e8ef', 600);
   txt('Play your own life: Money Life — a financial-planning simulator', 90, H - 70, 20, '#8b90a3');
   const url = c.toDataURL('image/png');
@@ -1772,7 +1784,7 @@ function endGame() {
         </div></div>`;
     const ach = achievementsFor(p, ev);
     tabs.result += `<div class="panel"><h3 class="eyebrow">Achievements <span style="font-weight:400;letter-spacing:0;text-transform:none">· ${ach.got.length} this life${players.length === 1 ? ', ' + ach.collected + '/' + ach.total + ' all time' : ''}</span></h3>
-      <div class="badges">${ACHIEVEMENTS.map(a => { const g = ach.got.includes(a); return `<div class="badge ${g ? 'got' : ''} ${ach.fresh.includes(a.id) ? 'fresh' : ''}"><b>${ach.fresh.includes(a.id) ? '<span class="new">NEW</span>' : ''}${g ? '🏅' : '🔒'} ${a.name}</b><small>${a.desc}</small></div>`; }).join('')}</div></div>`;
+      <div class="badges">${ACHIEVEMENTS.map(a => { const g = ach.got.includes(a); return `<div class="badge ${g ? 'got' : ''} ${ach.fresh.includes(a.id) ? 'fresh' : ''}"><b>${ach.fresh.includes(a.id) ? '<span class="new">NEW</span>' : ''}<i aria-hidden="true">${g ? '✓' : ''}</i>${a.name}</b><small>${a.desc}</small></div>`; }).join('')}</div></div>`;
     // ---- story ----
     tabs.story += `<div class="panel story"><h3>The story of ${players.length > 1 ? p.name + "'s" : 'your'} life</h3>${story.map(t => `<p>${t}</p>`).join('')}
       <div class="row" style="margin-top:12px"><button class="ghost" id="copy${i}">Copy story</button> <button class="ghost" id="card${i}">Result card (PNG)</button></div></div>`;
