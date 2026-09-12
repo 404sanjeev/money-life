@@ -65,8 +65,10 @@
   .personas button { text-align: left; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; transition: border-color .12s, transform .12s, background .12s; }
   .personas button:hover { border-color: var(--line2); transform: translateY(-1px); }
   .personas button.on { border-color: var(--gold); background: linear-gradient(180deg, rgba(244, 201, 93, .12), rgba(244, 201, 93, .03)); }
-  .personas b { display: block; margin-bottom: 3px; font-family: var(--display); font-size: 17px; font-weight: 700; }
-  .personas small { color: var(--muted); display: block; line-height: 1.4; }
+  .personas b { display: block; font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.2; }
+  .personas .diff { display: block; font: 600 10.5px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 4px 0 6px; }
+  .personas button.on .diff { color: var(--gold); }
+  .personas small { color: var(--muted); display: block; line-height: 1.4; font-size: 12.5px; }
   .startrow { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
   .startrow input { background: var(--panel2); color: var(--text); border: 1px solid var(--line2); border-radius: 12px; padding: 9px 12px; width: 170px; font: inherit; }
   .startrow input::placeholder { color: var(--faint); }
@@ -334,13 +336,6 @@
       <button data-m="2">Two players, same luck (take turns)</button>
     </div>
     <div class="row startrow">
-      <span class="muted">Currency</span>
-      <div class="seg" id="curSeg">
-        <button data-c="₹" class="on">₹</button>
-        <button data-c="$">$</button>
-        <button data-c="€">€</button>
-        <button data-c="£">£</button>
-      </div>
       <input id="nameIn" placeholder="Your name" style="width:150px">
       <input id="seedIn" placeholder="Luck seed (optional)" title="Everyone who enters the same seed gets the same luck — for classrooms and rematches">
       <span style="margin-left:auto" class="row">
@@ -529,8 +524,8 @@ function incomeTax(taxable) {
 }
 
 // ---------- currency & formatting ----------
-const CUR = { '₹': { mult: 12, ind: true }, '$': { mult: 1, ind: false }, '€': { mult: 0.9, ind: false }, '£': { mult: 0.8, ind: false } };
-let symbol = '₹';
+const CUR = { '₹': { mult: 12, ind: true } };                 // rupees only; internal unit ≈ ₹12
+const symbol = '₹';
 function money(n, dec) {
   const c = CUR[symbol]; let v = n * c.mult; const neg = v < 0; v = Math.abs(v);
   let s;
@@ -1441,14 +1436,14 @@ async function skipToDecision() {
 // ---------- save & resume ----------
 function saveGame() {
   try {
-    localStorage.setItem('moneylife.save', JSON.stringify({ seed, mode, personaId, startAgeSel, cp, symbol, G, you: PERSONAS.you, playerName, players: players.map(p => ({ name: p.name, s: p.s, log: p.log, decisions: p.decisions, lastMsgs: p.lastMsgs })) }));
+    localStorage.setItem('moneylife.save', JSON.stringify({ seed, mode, personaId, startAgeSel, cp, G, you: PERSONAS.you, playerName, players: players.map(p => ({ name: p.name, s: p.s, log: p.log, decisions: p.decisions, lastMsgs: p.lastMsgs })) }));
   } catch (e) {}
 }
 function clearSave() { try { localStorage.removeItem('moneylife.save'); } catch (e) {} }
 function loadSave() { try { return JSON.parse(localStorage.getItem('moneylife.save') || 'null'); } catch (e) { return null; } }
 function resumeGame() {
   const d = loadSave(); if (!d) return;
-  seed = d.seed; mode = d.mode; personaId = d.personaId; startAgeSel = d.startAgeSel || 22; cp = d.cp; symbol = d.symbol || symbol; playerName = d.playerName || '';
+  seed = d.seed; mode = d.mode; personaId = d.personaId; startAgeSel = d.startAgeSel || 22; cp = d.cp; playerName = d.playerName || '';
   if (d.you) Object.assign(PERSONAS.you, d.you, { desc: PERSONAS.you.desc });
   draws = makeDraws(seed); G = d.G;
   players = d.players.map(p => ({ ...p, pendingCard: null, pickedOpt: null }));
@@ -1756,10 +1751,9 @@ function endGame() {
 
 // ---------- wiring ----------
 if (typeof document !== 'undefined' && document.getElementById('personas')) {
-$('personas').innerHTML = Object.entries(PERSONAS).map(([id, P]) => `<button data-p="${id}" class="${id === personaId ? 'on' : ''}"><b>${P.name} <span class="muted" style="font-family:var(--body);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase">· ${P.diff}</span></b><small>${P.desc()}</small></button>`).join('');
+$('personas').innerHTML = Object.entries(PERSONAS).map(([id, P]) => `<button data-p="${id}" class="${id === personaId ? 'on' : ''}"><b>${P.name}</b><span class="diff">${P.diff}</span><small>${P.desc()}</small></button>`).join('');
 function refreshPersonas() { $('personas').querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.p === personaId); b.querySelector('small').textContent = PERSONAS[b.dataset.p].desc(); }); }
 $('personas').onclick = e => { const b = e.target.closest('button'); if (b) { personaId = b.dataset.p; refreshPersonas(); if (PERSONAS[personaId].startAge) setStartAge(PERSONAS[personaId].startAge); } };
-$('curSeg').querySelectorAll('button').forEach(b => b.onclick = () => { symbol = b.dataset.c; $('curSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); refreshPersonas(); });
 $('modeSeg').querySelectorAll('button').forEach(b => b.onclick = () => { mode = +b.dataset.m; $('modeSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
 function setStartAge(a) { startAgeSel = a; $('ageSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.a === a)); }
 $('ageSeg').querySelectorAll('button').forEach(b => b.onclick = () => setStartAge(+b.dataset.a));
