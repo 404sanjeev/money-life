@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money Life</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    /* ink-navy ground, marigold gold accent, banknote teal for player two */
+    --bg: #0d1120; --panel: #141a2c; --panel2: #1b2237; --panel3: #222b45; --line: #262e46; --line2: #33405f;
+    --text: #eceef7; --muted: #8f97b3; --faint: #5d6684;
+    --gold: #f4c95d; --gold-deep: #d9a92f; --gold-ink: #2a2000; --teal: #5cc8e8; --ghostc: #8f97b3;
+    --pos: #3fd18f; --neg: #ff6b7a; --warn: #ff9f43; --happy: #b48cff;
+    /* aliases kept for inline styles */
+    --green: var(--pos); --accent: var(--gold); --purple: var(--happy); --amber: var(--warn); --red: var(--neg);
+    --display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --r: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(900px 500px at 15% -10%, rgba(244, 201, 93, .10), transparent 60%), radial-gradient(700px 400px at 100% 100%, rgba(92, 200, 232, .07), transparent 60%); }
+  section { position: relative; z-index: 1; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .hidden { display: none !important; }
+  .muted { color: var(--muted); }
+  .num { font-variant-numeric: tabular-nums; }
+  h1, h2, .display { font-family: var(--display); font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+  h3.eyebrow, .eyebrow { margin: 0 0 10px; font: 600 11px/1 var(--body); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+
+  /* ---------- buttons ---------- */
+  .primary { background: var(--gold); color: var(--gold-ink); border: 0; border-radius: 12px; padding: 12px 22px; font-weight: 700; font-size: 16px; box-shadow: 0 6px 18px -8px rgba(244, 201, 93, .7); transition: transform .12s, box-shadow .12s, filter .12s; }
+  .primary:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
+  .primary:active:not(:disabled) { transform: translateY(0); }
+  .primary:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+  .ghost { background: transparent; color: var(--text); border: 1px solid var(--line2); border-radius: 12px; padding: 10px 16px; transition: border-color .12s, background .12s; }
+  .ghost:hover:not(:disabled) { border-color: var(--gold); background: rgba(244, 201, 93, .06); }
+  .ghost:disabled { opacity: .4; cursor: not-allowed; }
+  .seg { display: inline-flex; border: 1px solid var(--line2); border-radius: 12px; overflow: hidden; background: var(--panel2); }
+  .seg button { background: transparent; color: var(--muted); border: 0; padding: 8px 14px; transition: background .12s, color .12s; }
+  .seg button:hover { color: var(--text); }
+  .seg button.on { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; }
+
+  /* ---------- start ---------- */
+  #start { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 28px 20px; }
+  .intro { max-width: 820px; width: 100%; }
+  .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: end; margin-bottom: 28px; }
+  .hero h1 { margin: 0; font-size: clamp(56px, 9vw, 96px); line-height: .92; font-weight: 900; font-variation-settings: 'opsz' 144, 'SOFT' 100; }
+  .hero h1 span { color: var(--gold); font-style: italic; font-weight: 500; }
+  .hero .thesis { color: var(--muted); font-size: 17px; line-height: 1.55; margin: 0; }
+  .hero .thesis b { color: var(--text); font-weight: 600; }
+  .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 26px; }
+  .how div { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+  .how b { display: block; font-family: var(--display); font-size: 18px; margin-bottom: 4px; }
+  .how span { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+  .intro h3 { margin: 22px 0 10px; font: 600 11px/1 var(--body); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+  .personas { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .personas button { text-align: left; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; transition: border-color .12s, transform .12s, background .12s; }
+  .personas button:hover { border-color: var(--line2); transform: translateY(-1px); }
+  .personas button.on { border-color: var(--gold); background: linear-gradient(180deg, rgba(244, 201, 93, .12), rgba(244, 201, 93, .03)); }
+  .personas b { display: block; margin-bottom: 3px; font-family: var(--display); font-size: 17px; font-weight: 700; }
+  .personas small { color: var(--muted); display: block; line-height: 1.4; }
+  .startrow { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .startrow input { background: var(--panel2); color: var(--text); border: 1px solid var(--line2); border-radius: 12px; padding: 9px 12px; width: 170px; font: inherit; }
+  .startrow input::placeholder { color: var(--faint); }
+  #btnResume { border-color: var(--gold); color: var(--gold); }
+
+  /* ---------- game layout ---------- */
+  #game { max-width: 1240px; margin: 0 auto; padding: 14px 16px 90px; display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+  .topbar { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 24px; align-items: center; padding: 4px 4px 10px; }
+  .brand { font-family: var(--display); font-size: 24px; font-weight: 900; }
+  .brand span { color: var(--gold); font-style: italic; font-weight: 500; }
+  .timeline { position: relative; padding: 14px 0 4px; }
+  .tl-track { position: relative; height: 6px; background: var(--panel2); border-radius: 3px; overflow: visible; }
+  .tl-fill { position: absolute; left: 0; top: 0; height: 100%; background: linear-gradient(90deg, var(--gold-deep), var(--gold)); border-radius: 3px; transition: width .45s cubic-bezier(.2, .7, .2, 1); }
+  .tl-dot { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); border: 3px solid var(--bg); transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--gold); transition: left .45s cubic-bezier(.2, .7, .2, 1); }
+  .tl-mark { position: absolute; top: -4px; width: 2px; height: 14px; background: var(--line2); transform: translateX(-50%); }
+  .tl-mark::after { content: attr(data-l); position: absolute; top: 16px; left: 50%; transform: translateX(-50%); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+  .tl-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .agebox { text-align: right; line-height: 1.1; }
+  .agebox b { font-family: var(--display); font-size: 40px; font-weight: 700; display: block; }
+  .agebox small { color: var(--muted); font-size: 12px; }
+  #turnName { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+  #turnName i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  .rail { position: sticky; top: 12px; align-self: start; }
+  .nw { padding: 4px 0 14px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .nw .big { font-family: var(--display); font-size: 40px; font-weight: 700; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .nw .big.neg { color: var(--neg); }
+  .nw .sub { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+  .stat { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .stat:last-child { border-bottom: 0; }
+  .stat .k { color: var(--muted); }
+  .stat .v { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+  .pos { color: var(--pos); } .neg { color: var(--neg); } .warn { color: var(--warn); }
+  .bar { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, #7c5cff, var(--happy)); transition: width .5s; }
+
+  .main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .main.shake { animation: shake .5s; }
+  @keyframes shake { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-5px); } 40%, 60% { transform: translateX(5px); } }
+
+  /* hints */
+  .hints { background: linear-gradient(180deg, rgba(244, 201, 93, .10), rgba(244, 201, 93, .03)); border: 1px solid rgba(244, 201, 93, .35); }
+  .hints ol { margin: 0; padding-left: 20px; color: var(--text); }
+  .hints li { margin: 3px 0; } .hints li b { color: var(--gold); }
+  .hints .row { margin-top: 10px; }
+
+  /* ledger */
+  .ledger ul { margin: 0; padding: 0; list-style: none; }
+  .ledger li { padding: 5px 0 5px 22px; position: relative; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .ledger li:last-child { border-bottom: 0; }
+  .ledger li::before { content: '·'; position: absolute; left: 4px; top: 4px; font-weight: 800; color: var(--faint); }
+  .ledger li.pos::before { content: '+'; color: var(--pos); }
+  .ledger li.neg::before { content: '−'; color: var(--neg); }
+  .ledger li.warn::before { content: '!'; color: var(--warn); }
+
+  /* the decision card */
+  .card { position: relative; border: 1px solid var(--line2); background: radial-gradient(600px 220px at 0% 0%, rgba(244, 201, 93, .12), transparent 60%), var(--panel2); overflow: hidden; }
+  .card.deal { animation: deal .45s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes deal { from { opacity: 0; transform: translateY(16px) rotate(-.6deg) scale(.985); } to { opacity: 1; transform: none; } }
+  .card .eyebrow { color: var(--gold); }
+  .card .title { font-family: var(--display); font-size: 27px; font-weight: 700; line-height: 1.15; margin-bottom: 8px; text-wrap: balance; }
+  .card .text { color: #c9cee0; margin-bottom: 16px; max-width: 62ch; line-height: 1.55; }
+  .opts { display: grid; gap: 8px; }
+  .opts button { position: relative; text-align: left; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px 11px 44px; transition: border-color .12s, background .12s, transform .12s; }
+  .opts button::before { content: attr(data-k); position: absolute; left: 12px; top: 11px; width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line2); color: var(--muted); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+  .opts button:hover:not(:disabled) { border-color: var(--line2); background: var(--panel3); transform: translateX(2px); }
+  .opts button.picked { border-color: var(--gold); background: linear-gradient(180deg, rgba(244, 201, 93, .14), rgba(244, 201, 93, .05)); }
+  .opts button.picked::before { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+  .opts button:disabled { opacity: .45; cursor: not-allowed; }
+  .opts small { display: block; color: var(--muted); }
+
+  /* controls */
+  .controls .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px 22px; }
+  .ctl label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .ctl label b { color: var(--text); }
+  input[type=range] { width: 100%; accent-color: var(--gold); height: 28px; }
+  .lifestyle { display: flex; width: 100%; }
+  .lifestyle button { flex: 1; padding: 8px 6px; }
+  .toggle { display: flex; align-items: center; gap: 8px; margin-top: 4px; cursor: pointer; color: var(--text) !important; font-size: 13.5px !important; }
+  .toggle input { accent-color: var(--gold); width: 17px; height: 17px; flex-shrink: 0; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .actions .note { color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
+  .actions .btns { display: flex; gap: 8px; }
+  kbd { font: 600 11px/1 var(--body); color: var(--muted); border: 1px solid var(--line2); border-radius: 5px; padding: 2px 5px; margin-left: 6px; vertical-align: middle; }
+
+  /* chart */
+  .chartwrap { grid-column: 1 / -1; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+  .chartbox { position: relative; }
+  .chartbox svg { width: 100%; height: 230px; display: block; }
+  .chartbox .ylab { position: absolute; left: 8px; top: 6px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .chartbox .endlab { position: absolute; transform: translate(-100%, -130%); background: var(--gold); color: var(--gold-ink); font-weight: 700; font-size: 12px; padding: 2px 7px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; pointer-events: none; }
+  .xticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .log { grid-column: 1 / -1; max-height: 220px; overflow: auto; font-size: 13px; }
+  .log div { padding: 5px 0; border-bottom: 1px dashed var(--line); color: var(--muted); }
+  .log div b { color: var(--text); margin-right: 8px; font-variant-numeric: tabular-nums; }
+
+  /* ---------- end ---------- */
+  #end { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 16px; }
+  .grade { display: flex; gap: 22px; align-items: center; }
+  .grade .letter { font-family: var(--display); font-size: 96px; font-weight: 900; line-height: 1; width: 132px; text-align: center; border-radius: 18px; background: var(--panel2); padding: 12px 0; flex-shrink: 0; }
+  .grade h2 { margin: 0 0 6px; font-size: 28px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .lesson { border-left: 3px solid var(--warn); padding: 8px 12px; margin: 8px 0; background: var(--panel2); border-radius: 0 10px 10px 0; font-size: 14px; }
+  .lesson.good { border-color: var(--pos); }
+  .cmp { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  .cmp th, .cmp td { text-align: left; padding: 7px 10px; border-bottom: 1px dashed var(--line); }
+  .cmp td:first-child { color: var(--muted); }
+  .story p { margin: 8px 0; line-height: 1.65; max-width: 70ch; font-size: 15.5px; }
+  .story h3 { font-family: var(--display); font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+  .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .badge { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 9px 11px; opacity: .4; }
+  .badge.got { opacity: 1; border-color: var(--gold); }
+  .badge.fresh { box-shadow: 0 0 0 2px var(--happy); }
+  .badge b { display: block; font-size: 13px; } .badge small { color: var(--muted); }
+  .overlay { position: fixed; inset: 0; background: rgba(6, 8, 16, .8); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
+  .ovbox { background: var(--panel); border: 1px solid var(--line2); border-radius: var(--r); padding: 14px; max-width: 520px; width: 100%; }
+  .ovbox img { width: 100%; border-radius: 10px; display: block; margin-bottom: 10px; }
+
+  /* screen transitions */
+  section:not(.hidden) { animation: enter .4s cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  /* the year resolving: ledger lines arrive one by one */
+  .ledger li.rise { animation: rise .38s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
+  @keyframes rise { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+  .agebox b.pop { animation: pop .4s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.14); color: var(--gold); } 100% { transform: scale(1); } }
+  .quiet { display: inline-block; font: 600 10px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line2); border-radius: 999px; padding: 4px 8px; margin-left: 8px; vertical-align: middle; }
+  /* deltas next to stats */
+  .stat .d { display: block; font-size: 11px; font-weight: 500; color: var(--faint); }
+  .stat .d.up { color: var(--pos); } .stat .d.dn { color: var(--neg); }
+  /* emergency-fund gauge */
+  .gauge { display: flex; gap: 3px; margin-top: 5px; }
+  .gauge i { flex: 1; height: 5px; border-radius: 2px; background: var(--panel3); }
+  .gauge.neg i.on { background: var(--neg); } .gauge.warn i.on { background: var(--warn); } .gauge.pos i.on { background: var(--pos); }
+  /* sliders */
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; margin: 0; }
+  input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--gold) 0 var(--p, 50%), var(--panel3) var(--p, 50%) 100%); }
+  input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--panel3); }
+  input[type=range]::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--gold); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--text); border: 3px solid var(--gold); margin-top: -6px; box-shadow: 0 2px 6px rgba(0, 0, 0, .4); transition: transform .12s; }
+  input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--text); border: 3px solid var(--gold); }
+  input[type=range]:hover::-webkit-slider-thumb, input[type=range]:active::-webkit-slider-thumb { transform: scale(1.15); }
+  input#goldPct::-webkit-slider-runnable-track { background: linear-gradient(90deg, #e0a53a 0 var(--p, 10%), var(--panel3) var(--p, 10%) 100%); }
+  .alloc { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 6px 0 4px; background: var(--panel3); }
+  .alloc i { display: block; height: 100%; transition: width .25s; }
+  .alloc .eq { background: var(--gold); } .alloc .gd { background: #e0a53a; } .alloc .fd { background: var(--teal); }
+  .alloc-key { display: flex; gap: 12px; font-size: 11px; color: var(--muted); }
+  .alloc-key i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  /* toasts */
+  #toasts { position: fixed; top: 14px; right: 14px; z-index: 20; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast { background: var(--panel3); border: 1px solid var(--line2); border-left: 3px solid var(--gold); color: var(--text); border-radius: 10px; padding: 10px 14px; font-size: 13.5px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .6); animation: toastin .35s cubic-bezier(.2, .8, .2, 1), toastout .4s ease-in 3.2s both; max-width: 320px; }
+  .toast.pos { border-left-color: var(--pos); } .toast.neg { border-left-color: var(--neg); }
+  @keyframes toastin { from { opacity: 0; transform: translateX(20px); } } @keyframes toastout { to { opacity: 0; transform: translateY(-6px); } }
+  /* end screen */
+  .sharerow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .badge .new { float: right; font: 700 9px/1 var(--body); letter-spacing: .1em; color: var(--gold-ink); background: var(--gold); border-radius: 999px; padding: 3px 6px; }
+  .story p:first-of-type::first-letter { font-family: var(--display); font-size: 3.1em; font-weight: 700; float: left; line-height: .85; margin: 4px 8px 0 0; color: var(--gold); }
+  .diff div { padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 14px; } .diff div:last-child { border-bottom: 0; }
+  .rewind { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .rewind button { text-align: left; padding: 9px 12px; font-size: 13.5px; }
+  .rewind button b { font-family: var(--display); color: var(--gold); margin-right: 8px; font-variant-numeric: tabular-nums; }
+  .rewind button small { display: block; color: var(--faint); font-size: 11.5px; }
+  .cmpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cmpgrid div { background: var(--panel2); border-radius: 10px; padding: 10px 12px; }
+  .cmpgrid small { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
+  .cmpgrid b { font-family: var(--display); font-size: 34px; display: block; line-height: 1.1; }
+  .cmpgrid span { color: var(--muted); font-size: 13px; }
+  .diff b { display: inline-block; min-width: 64px; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .k[title] { cursor: help; border-bottom: 1px dotted var(--faint); }
+
+  /* play as yourself */
+  .you { margin-top: 10px; border-color: var(--gold); background: linear-gradient(180deg, rgba(244, 201, 93, .08), transparent); }
+  .you .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 14px; }
+  .you label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .you input, .you select { width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--line2); border-radius: 10px; padding: 8px 10px; font: inherit; font-variant-numeric: tabular-nums; }
+  .you .sum { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+  /* dreams */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips button { background: var(--panel); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; font-size: 13.5px; transition: all .12s; }
+  .chips button:hover { color: var(--text); border-color: var(--line2); }
+  .chips button.on { color: var(--gold-ink); background: var(--gold); border-color: var(--gold); font-weight: 600; }
+  .chips button:disabled { opacity: .4; cursor: not-allowed; }
+  .dreams { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .dreams .eyebrow { margin-bottom: 6px; }
+  .dream { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13.5px; }
+  .dream i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line2); display: grid; place-items: center; font-size: 11px; font-style: normal; font-weight: 800; flex-shrink: 0; }
+  .dream.done { color: var(--text); } .dream.done i { background: var(--pos); border-color: var(--pos); color: #06281a; }
+  .dream.lost { color: var(--faint); text-decoration: line-through; } .dream.lost i { border-color: var(--neg); color: var(--neg); }
+  .dream.open { color: var(--muted); }
+  .bar.free i { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
+  .why { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(244, 201, 93, .07); border: 1px dashed rgba(244, 201, 93, .35); font-size: 13.5px; line-height: 1.5; }
+  .why .eyebrow { display: block; color: var(--gold); margin-bottom: 3px; }
+  .why em { color: var(--muted); font-style: normal; }
+  .bar.free.full i { background: linear-gradient(90deg, var(--pos), #7ef0be); }
+  .dreamsum { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+  .dreamsum .dream { background: var(--panel2); border-radius: 10px; padding: 9px 12px; }
+  .agename { display: block; font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--gold); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  /* ---------- phone ---------- */
+  @media (max-width: 820px) {
+    #game { grid-template-columns: 1fr; padding-bottom: 96px; }
+    .topbar { grid-template-columns: 1fr auto; }
+    .timeline { grid-column: 1 / -1; order: 3; padding-top: 12px; }
+    .rail { position: static; }
+    .rail .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+    .nw .big { font-size: 34px; }
+    .hero { grid-template-columns: 1fr; }
+    .how { grid-template-columns: 1fr; }
+    .cols { grid-template-columns: 1fr; }
+    .grade { flex-direction: column; align-items: flex-start; }
+    .actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; padding: 10px 14px; background: rgba(13, 17, 32, .92); backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
+    .actions .note { font-size: 12px; min-width: 0; }
+    .card .title { font-size: 23px; }
+    .opts button { padding: 12px 12px 12px 44px; }
+    .chartbox svg { height: 170px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= START ================= -->
+<section id="start">
+  <div class="intro">
+    <div class="hero">
+      <h1>Money<br><span>Life</span></h1>
+      <p class="thesis"><b>One click, one year</b> — from your first salary to 85. A ghost lives a textbook plan with your <b>exact same luck</b>. Beat it.</p>
+    </div>
+    <div class="how">
+      <div><b>Habits</b><span>Spend, invest, equity vs. gold vs. FD, 80C.</span></div>
+      <div><b>Big calls</b><span>Marriage, flat, kids, jobs, the crypto tip.</span></div>
+      <div><b>Surprises</b><span>Layoffs, hospitals, crashes, scams that pay at first.</span></div>
+    </div>
+    <h3>Who are you at the start?</h3>
+    <div class="personas" id="personas"></div>
+    <div class="panel you hidden" id="youForm">
+      <h3 class="eyebrow" style="margin-top:0">Your numbers</h3>
+      <div class="grid">
+        <div><label>Your age</label><input id="yAge" type="number" min="22" max="50" value="30"></div>
+        <div><label>Monthly salary (take-home ₹)</label><input id="ySal" type="number" min="5000" step="1000" value="60000"></div>
+        <div><label>Savings + investments (₹)</label><input id="ySav" type="number" min="0" step="10000" value="300000"></div>
+        <div><label>Loans outstanding (₹)</label><input id="yLoan" type="number" min="0" step="10000" value="0"></div>
+        <div><label>Married</label><select id="yMar"><option value="0">No</option><option value="1">Yes</option></select></div>
+        <div><label>Children</label><select id="yKids"><option value="0">None</option><option value="1">One</option><option value="2">Two</option></select></div>
+        <div class="sum" id="ySum"></div>
+      </div>
+    </div>
+    <h3>Your dreams <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">— pick three. They stay on screen all game.</span></h3>
+    <div class="chips" id="dreamChips"></div>
+    <h3>Your call</h3>
+    <div class="seg" id="callSeg"><button data-c="beat" class="on">I'll beat the ghost</button><button data-c="lose">The ghost will beat me</button></div>
+    <h3 id="ageHead">Start at what age?</h3>
+    <div class="seg" id="ageSeg">
+      <button data-a="22" class="on">22</button><button data-a="25">25</button><button data-a="30">30</button><button data-a="35">35</button><button data-a="40">40</button>
+    </div>
+    <div class="hint" id="ageHint" style="margin-top:6px">Starting later means years of salary growth, some savings and EPF already banked — and the early decisions arrive in your first few years.</div>
+    <h3>How many players?</h3>
+    <div class="seg" id="modeSeg">
+      <button data-m="1" class="on">Solo</button>
+      <button data-m="2">Two players, same luck (take turns)</button>
+    </div>
+    <div class="row startrow">
+      <span class="muted">Currency</span>
+      <div class="seg" id="curSeg">
+        <button data-c="₹" class="on">₹</button>
+        <button data-c="$">$</button>
+        <button data-c="€">€</button>
+        <button data-c="£">£</button>
+      </div>
+      <input id="nameIn" placeholder="Your name" style="width:150px">
+      <input id="seedIn" placeholder="Luck seed (optional)" title="Everyone who enters the same seed gets the same luck — for classrooms and rematches">
+      <span style="margin-left:auto" class="row">
+        <button class="ghost hidden" id="btnResume">Continue</button>
+        <button class="primary" id="btnStart">Start my life →</button>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GAME ================= -->
+<section id="game" class="hidden">
+  <header class="topbar">
+    <div class="brand">Money <span>Life</span></div>
+    <div class="timeline">
+      <div class="tl-track"><i class="tl-fill" id="tlFill"></i><b class="tl-mark" id="tlRetire" data-l="retire"></b><b class="tl-dot" id="tlDot"></b></div>
+      <div class="tl-labels"><span>22</span><span>85</span></div>
+    </div>
+    <div class="agebox"><span id="turnName"></span><b id="age">22</b><small id="yearsLeft"></small></div>
+  </header>
+
+  <aside class="panel rail">
+    <div class="nw">
+      <div class="big num" id="nw">₹0</div>
+      <div class="sub">net worth · ghost <span id="ghostNw"></span></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="k" title="Savings account. Earns ~3%. This is what absorbs a bad year.">Cash</span><span class="v" id="cash"></span></div>
+      <div class="stat"><span class="k" title="Equity funds + gold + FDs. Sold (and taxed) if cash runs out.">Investments</span><span class="v" id="inv"></span></div>
+      <div class="stat"><span class="k" title="Locked until 60. Protected even in bankruptcy.">EPF + PPF + NPS</span><span class="v" id="locked"></span></div>
+      <div class="stat"><span class="k" title="Market value of the flat you live in.">Home</span><span class="v" id="home"></span></div>
+      <div class="stat"><span class="k" title="Investment property, if you bought one.">Rental flat</span><span class="v" id="rental"></span></div>
+      <div class="stat"><span class="k" title="Every loan, from the education loan to the credit card.">Debt</span><span class="v neg" id="debt"></span></div>
+      <div class="stat"><span class="k" title="Your salary plus your partner's, before tax.">Household income</span><span class="v" id="salary"></span></div>
+      <div class="stat"><span class="k" title="Living costs, kids, insurance, upkeep — before EMIs.">Yearly costs</span><span class="v" id="costs"></span></div>
+      <div class="stat"><span class="k">Family</span><span class="v" id="family"></span></div>
+      <div class="stat" style="display:block"><div style="display:flex;justify-content:space-between"><span class="k" title="Months of costs you could cover from cash alone. 3–6 is the textbook.">Emergency fund</span><span class="v" id="ef"></span></div><div class="gauge" id="efGauge"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    </div>
+    <div class="stat" style="display:block;border:0;padding-top:10px">
+      <div style="display:flex;justify-content:space-between"><span class="k" title="If you stopped working today: what your money earns ÷ what your life costs. 100% = free.">Financial freedom</span><span class="v" id="freeV"></span></div>
+      <div class="bar free" id="freeBarWrap"><i id="freeBar"></i></div>
+    </div>
+    <div class="stat" style="display:block;border:0;padding-top:6px">
+      <div style="display:flex;justify-content:space-between"><span class="k">Life satisfaction</span><span class="v" id="happyV"></span></div>
+      <div class="bar"><i id="happyBar"></i></div>
+    </div>
+    <div class="stat" style="display:block;border:0;padding-top:6px">
+      <div style="display:flex;justify-content:space-between"><span class="k" title="Lifestyle, stress and age move this. It sets hospital risk now, medical costs later, and how long you live.">Health</span><span class="v" id="healthV"></span></div>
+      <div class="bar health"><i id="healthBar"></i></div>
+    </div>
+    <div class="dreams" id="dreamsRail"></div>
+  </aside>
+
+  <div class="main" id="main">
+    <div class="panel hints hidden" id="hints">
+      <h3 class="eyebrow">How this works</h3>
+      <ol>
+        <li><b>One click, one year.</b> Set habits, press <b>Live this year</b>. <b>S</b> skips quiet years.</li>
+        <li><b>Keep the emergency fund green.</b> It's what keeps a bad year off the credit card.</li>
+        <li><b>The dotted line is the ghost.</b> Same luck, textbook plan. The gap is your choices.</li>
+      </ol>
+      <div class="row"><button class="ghost" id="hintsClose">Got it</button></div>
+    </div>
+
+    <div class="panel ledger" id="summary">
+      <h3 class="eyebrow" id="summaryTitle">Last year</h3>
+      <ul id="summaryList"></ul>
+      <div class="why hidden" id="why"><span class="eyebrow">Planner's note</span><div id="whyText"></div></div>
+    </div>
+
+    <div class="panel card hidden" id="card">
+      <h3 class="eyebrow" id="cardEyebrow">Decision</h3>
+      <div class="title" id="cardTitle"></div>
+      <div class="text" id="cardText"></div>
+      <div class="opts" id="cardOpts"></div>
+    </div>
+
+    <div class="panel controls">
+      <h3 class="eyebrow">Your habits this year</h3>
+      <div class="grid">
+        <div class="ctl">
+          <label>Lifestyle — <b id="lifeLabel"></b></label>
+          <div class="seg lifestyle" id="lifeSeg">
+            <button data-l="frugal">Frugal</button>
+            <button data-l="normal">Normal</button>
+            <button data-l="comfy">Comfy</button>
+            <button data-l="lavish">Lavish</button>
+          </div>
+          <div class="hint" id="lifeHint"></div>
+        </div>
+        <div class="ctl">
+          <label>Invest <b id="investLabel">50%</b> of what's left over</label>
+          <input type="range" id="investPct" min="0" max="100" step="5" value="50">
+          <div class="hint">The rest sits in a savings account (~3%, loses to inflation).</div>
+        </div>
+        <div class="ctl">
+          <label>Equity <b id="eqLabel">70%</b> · Gold <b id="goldLabel">10%</b> · FD <b id="fdLabel">20%</b></label>
+          <input type="range" id="equityPct" min="0" max="100" step="10" value="70" title="Equity share">
+          <input type="range" id="goldPct" min="0" max="100" step="10" value="10" title="Gold share">
+          <div class="alloc"><i class="eq" id="alEq"></i><i class="gd" id="alGd"></i><i class="fd" id="alFd"></i></div>
+          <div class="alloc-key"><span><i style="background:var(--gold)"></i>Equity</span><span><i style="background:#e0a53a"></i>Gold</span><span><i style="background:var(--teal)"></i>FD</span></div>
+          <div class="hint">Equity MFs ~10% avg, wild swings. Gold ~7%, bumpy. FDs 6.5%, steady.</div>
+        </div>
+        <div class="ctl">
+          <label>Tax, debt &amp; body</label>
+          <label class="toggle"><input type="checkbox" id="selfCare"> Look after yourself — <span id="careLabel"></span>/yr on gym, checkups, decent food</label>
+          <label class="toggle"><input type="checkbox" id="c80" checked> Max out 80C — <span id="c80Label"></span>/yr into PPF/ELSS</label>
+          <label class="toggle"><input type="checkbox" id="nps"> NPS — <span id="npsLabel"></span>/yr extra deduction, locked till 60</label>
+          <label class="toggle"><input type="checkbox" id="payDebt" checked> Prepay expensive loans once 3 months' cash is set aside</label>
+          <div class="hint">80C cuts your taxable income. Credit card is 24% — nothing beats paying that off. Cheap loans (education 6%, home 6%, MBA 7%) just run their course.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <span class="note" id="note"></span>
+      <span class="btns">
+        <button class="ghost" id="btnSkip" title="Auto-advance quiet years until the next decision">Skip to next decision<kbd>S</kbd></button>
+        <button class="primary" id="btnNext">Live this year →<kbd style="color:var(--gold-ink);border-color:rgba(0,0,0,.25)">↵</kbd></button>
+      </span>
+    </div>
+  </div>
+
+  <div class="panel chartwrap">
+    <div class="legend" id="legend">
+      <span><i style="background:var(--gold)"></i>You</span>
+      <span><i style="background:var(--ghostc)"></i>Ghost (textbook plan, same luck)</span>
+    </div>
+    <div class="chartbox"><svg id="chart" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="ylab"></div><div class="endlab"></div></div>
+    <div class="xticks"></div>
+  </div>
+
+  <div class="panel log" id="log"></div>
+</section>
+<div id="toasts"></div>
+
+<!-- ================= END ================= -->
+<section id="end" class="hidden"></section>
+
+<script>
+/* =====================================================================
+   Money Life — a financial-planning life simulator (India edition)
+   One year per turn, 22 → 60. All math is deliberately simplified.
+   Internal money unit ≈ ₹12 (so 50,000 units = ₹6 L).
+   ===================================================================== */
+
+const START_AGE = 22, END_AGE = 85, RETIRE_AGE = 60;
+const INFL = 0.03;
+const BASE_COST = 30000;                       // "normal" lifestyle, age 22, single
+const LIFE = {                                 // cost multiplier, yearly happiness
+  frugal: { m: 0.80, h: -1,   label: 'Frugal', hint: 'PG room, cook at home, no Swiggy. Saves a lot, wears on you.' },
+  normal: { m: 1.00, h:  0,   label: 'Normal', hint: 'Average everything.' },
+  comfy:  { m: 1.30, h: +1,   label: 'Comfy',  hint: 'Nice flat, eat out, a trip or two a year.' },
+  lavish: { m: 1.75, h: +2.5, label: 'Lavish', hint: 'Living like the ads. Very happy, very expensive.' },
+};
+// Starting lives. Money in internal units (₹ = ×12). desc() re-renders in the chosen currency.
+const PERSONAS = {
+  grad:   { name: 'Fresh graduate', diff: 'Normal', salary: 50000, loan: 25000, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035,
+            desc: () => `${money(50000)} job in a metro, ${money(25000)} education loan. The default life.` },
+  tier2:  { name: 'Tier-2 hustler', diff: 'Hard', salary: 20000, loan: 0, cash: 1000, cityMult: 0.7, scale: 0.5, layoff: 0.05, growth: 0.04,
+            desc: () => `No degree, ${money(20000)} job in a small city. Cheaper life, slower ladder, no loan.` },
+  topper: { name: 'IIT / IIM topper', diff: 'Easy money, hard life', salary: 150000, loan: 165000, cash: 5000, cityMult: 1.3, scale: 1.6, layoff: 0.07, growth: 0.03,
+            desc: () => `${money(150000)} starting salary, ${money(165000)} education loan, Bangalore prices, tech layoffs, expensive tastes arrive free.` },
+  govt:   { name: 'Government officer', diff: 'Easy', salary: 35000, loan: 10000, cash: 2000, cityMult: 0.9, scale: 0.85, layoff: 0, growth: 0.03, pension: true,
+            desc: () => `${money(35000)}, can never be laid off, a pension at 60 instead of EPF. Slow and steady.` },
+  heir:   { name: 'Family business heir', diff: 'Normal', salary: 30000, loan: 0, cash: 400000, cityMult: 1.0, scale: 1.0, layoff: 0.07, growth: 0.025, heir: true,
+            desc: () => `${money(400000)} in the bank at 22 and ${money(30000)}/yr from the shop. Bad years happen. Growth is up to you.` },
+  you:    { name: 'Yourself', diff: 'Your numbers', custom: true, salary: 50000, loan: 0, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035,
+            desc: () => 'Your real age, salary, savings, loans and family. Skin in the game.' },
+  parent: { name: 'Single parent', diff: 'Hard', salary: 70000, loan: 0, cash: 10000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035, startAge: 30, kids: [28], insured: true,
+            desc: () => `Start at 30 with a two-year-old, ${money(70000)} salary, no partner, no savings to speak of.` },
+};
+const RATES = { student: 0.06, card: 0.24, car: 0.09, school: 0.07, mortgage: 0.06, rental: 0.085, kidloan: 0.09, personal: 0.14 };
+const LTCG = 0.125;                            // long-term capital gains tax on equity and gold
+const NPS_MAX = 4167;                          // ₹50,000 extra deduction under 80CCD(1B)
+const DICGC = 41667;                           // ₹5 L deposit insurance
+// Income tax slabs (fixed in nominal terms — bracket creep is real) + 4% cess. In ₹: 3 L nil, 5% to 7 L, 10% to 10 L, 15% to 12 L, 20% to 15 L, 30% above.
+const SLABS = [[25000, 0], [58333, 0.05], [83333, 0.10], [100000, 0.15], [125000, 0.20], [Infinity, 0.30]];
+const STD_DED = 6250;                          // ₹75,000 standard deduction
+const C80_MAX = 12500;                         // ₹1.5 L
+const TERM_COVER = 1e7 / 12;                   // ₹1 Cr
+function incomeTax(taxable) {
+  let t = 0, prev = 0;
+  for (const [lim, r] of SLABS) { if (taxable > prev) t += (Math.min(taxable, lim) - prev) * r; prev = lim; if (taxable <= lim) break; }
+  return t * 1.04;
+}
+
+// ---------- currency & formatting ----------
+const CUR = { '₹': { mult: 12, ind: true }, '$': { mult: 1, ind: false }, '€': { mult: 0.9, ind: false }, '£': { mult: 0.8, ind: false } };
+let symbol = '₹';
+function money(n, dec) {
+  const c = CUR[symbol]; let v = n * c.mult; const neg = v < 0; v = Math.abs(v);
+  let s;
+  if (c.ind) {
+    if (v >= 9.9995e6) s = (v / 1e7).toFixed(dec ?? 2) + ' Cr';
+    else if (v >= 1e5) s = (v / 1e5).toFixed(dec ?? 1) + ' L';
+    else s = Math.round(v).toLocaleString('en-IN');
+  } else {
+    if (v >= 1e6) s = (v / 1e6).toFixed(dec ?? 2) + 'M';
+    else if (v >= 1e4) s = (v / 1e3).toFixed(dec ?? 0) + 'K';
+    else s = Math.round(v).toLocaleString();
+  }
+  return (neg ? '−' : '') + symbol + s;
+}
+const pct = n => Math.round(n * 100) + '%';
+
+// ---------- seeded randomness (so ghost & replay share luck) ----------
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gaussian(rng) { let u = 0, v = 0; while (u === 0) u = rng(); while (v === 0) v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function makeDraws(seed) {
+  const rng = mulberry32(seed), d = [];
+  for (let a = START_AGE; a <= END_AGE; a++) {
+    d.push({ ret: Math.max(-0.5, 0.10 + 0.18 * gaussian(rng)), gold: Math.max(-0.3, 0.07 + 0.12 * gaussian(rng)), hazard: rng(), event: rng(), gamble: rng(), family: rng() });
+  }
+  return d;
+}
+
+// ---------- state ----------
+function newState(personaId = 'grad', startAge) {
+  const P = PERSONAS[personaId]; startAge = startAge || P.startAge || START_AGE;
+  const yrs = startAge - START_AGE;                                            // years already worked
+  const salary = P.custom ? P.salary : P.salary * Math.pow(1 + P.growth + 0.012, yrs);   // raises plus the odd promotion
+  const s = {
+    age: startAge, salary, cash: P.custom ? P.cash * 0.4 : P.cash + salary * 0.08 * yrs, equity: P.custom ? P.cash * 0.4 : salary * 0.06 * yrs, gold: 0, fd: P.custom ? P.cash * 0.2 : salary * 0.04 * yrs,
+    epf: P.pension ? 0 : salary * 0.07 * yrs * 1.4, ppf: 0, house: 0, rentalFlat: 0,
+    debts: { student: P.custom ? P.loan : Math.max(0, P.loan - 3200 * yrs * 1.3), card: 0, car: 0, school: 0, mortgage: 0, rental: 0, kidloan: 0, personal: 0 },
+    mortgagePay: 0, rentalPay: 0, insured: !!P.insured, termCover: false, coverSince: 0,
+    married: !!P.married, spouseSalary: P.married ? salary * 0.6 : 0, kids: P.kidsAges ? [...P.kidsAges] : P.kids ? [startAge - 2] : [], happy: 55, cost: Math.pow(1 + INFL, startAge - START_AGE),
+    cityMult: P.cityMult, scale: P.scale, layoffBase: P.layoff, growth: P.growth, pension: !!P.pension, heir: !!P.heir, personaId,
+    startAge, marriedAt: P.married ? startAge - 3 : 0, health: 80, selfCare: false, dead: 0, retired: false, pensionPay: 0, annuity: 0, partTimeUntil: 0, brokeAt: 0, at60: null, justPromoted: false, yearsFrugal: 0, crashesHeld: 0, nwAt40: 0, debtAt40: null,
+    nps: 0, npsOn: false, basis: 0, ltcg: 0, ltcgYear: 0, chit: null, coop: null, mlmHit: 0, familyLoan: 0, crunchPlan: null, tenure: 0, parentsSupport: false, gratuity: 0,
+    lifestyle: 'normal', investPct: 50, equityPct: 70, goldPct: 10, payDebt: true, c80: true,
+    riskyYears: 0, sideIncome: 0, mbaLeft: 0, feeDrag: 0, cosignHit: 0,
+    lastRet: 0, unemployed: false, bankruptcies: 0, taxPaid: 0, taxSaved: 0, done: {}, history: [],
+  };
+  // life before the start age already happened — except the big early calls, which arrive in your first years instead
+  const shift = { insure: 0, term: 2, house: 2, car: 1 };
+  s.shift = {};
+  for (const c of CARDS) if (c.age < startAge) { if (c.id in shift) s.shift[c.id] = startAge + shift[c.id]; else s.done[c.id] = true; }
+  s.basis = s.equity;
+  for (let a = START_AGE; a < startAge; a++) s.history.push(null);
+  s.history.push(netWorth(s));
+  return s;
+}
+const liquid = s => s.cash + s.equity + s.gold + s.fd;
+// "If you stopped working today": passive income ÷ what your life costs.
+function freedomOf(s) {
+  const corpus = s.cash + s.equity + s.gold + s.fd + s.epf + s.ppf + s.nps;
+  const passive = corpus * 0.04 + s.rentalFlat * 0.02 + s.annuity + s.pensionPay + (s.age >= RETIRE_AGE ? 0 : 0);
+  const costs = s.retired ? retiredCosts(s) : yearlyCosts(s);
+  return passive / Math.max(1, costs);
+}
+// Dreams the player picks at the start. test → true (done), false (lost), null (still open).
+const DREAMS = {
+  house:   { name: 'Own a home', test: (p, s) => s.house > 0 ? true : s.age > 58 ? false : null },
+  crore40: { name: '₹1 Cr by 40', test: (p, s) => netWorth(s) >= 1e7 / 12 && s.age <= 40 ? true : s.age > 40 ? false : null },
+  free55:  { name: 'Financially free by 55', test: (p, s) => freedomOf(s) >= 1 && s.age <= 55 ? true : s.age > 55 ? false : null },
+  debt45:  { name: 'Debt-free by 45', test: (p, s) => totalDebt(s) <= 1 && s.age >= 25 ? true : s.age > 45 ? false : null },
+  college: { name: "Pay for a child's college", test: (p, s) => /Paid for your child's college/.test(p.logText || '') ? true : s.age > 58 ? false : null },
+  trip:    { name: 'The trip of a lifetime', test: (p, s) => /Took the trip/.test(p.logText || '') ? true : s.age > 38 ? false : null },
+  parents: { name: 'Look after my parents', test: (p, s) => /Started supporting your parents/.test(p.logText || '') ? true : /Left your parents/.test(p.logText || '') ? false : null },
+  biz:     { name: 'Run a business that works', test: (p, s) => /side business works/.test(p.logText || '') ? true : (/flopped|hobby/.test(p.logText || '') || s.age > 46) ? false : null },
+  legacy:  { name: 'Leave ₹2 Cr behind', test: (p, s) => s.age >= END_AGE ? netWorth(s) >= 2e7 / 12 : s.brokeAt ? false : null },
+  happy:   { name: 'Stay happy through it all', test: (p, s) => s.happy < 30 ? false : s.age >= END_AGE ? true : null },
+};
+function updateDreams(p) {
+  p.logText = p.log.map(e => e.t).join('\n'); p.dreamState = p.dreamState || {};
+  const fresh = [];
+  for (const id of p.dreams || []) { if (p.dreamState[id] === true || p.dreamState[id] === false) continue; const r = DREAMS[id].test(p, p.s); if (r !== null) { p.dreamState[id] = r; fresh.push([id, r]); } }
+  return fresh;
+}
+const locked = s => s.epf + s.ppf;
+const totalDebt = s => Object.values(s.debts).reduce((a, b) => a + b, 0);
+const netWorth = s => liquid(s) + locked(s) + s.house + s.rentalFlat - totalDebt(s);
+const household = s => s.salary + s.spouseSalary;
+const creep = s => Math.pow(Math.max(0.5, household(s) / (50000 * s.cost * (s.married ? 1.6 : 1))), 0.8);   // lifestyle inflation as income rises (per household)
+function livingBase(s) { return BASE_COST * s.cost * s.cityMult * LIFE[s.lifestyle].m * creep(s) * (s.married ? 1.45 : 1); }
+const rentOf = s => livingBase(s) * 0.35;
+function yearlyCosts(s) {
+  let c = livingBase(s);
+  if (s.house > 0) c = c * 0.65 + s.house * 0.012;             // no rent, but upkeep + property tax
+  for (const b of s.kids) if (s.age < b + 22) c += 10000 * s.cost;
+  if (s.insured) c += 1800 * s.cost * Math.pow(1.03, s.age - START_AGE);   // premiums outrun inflation
+  if (s.parentsSupport && s.age < 62) c += 4000 * s.cost * s.scale;
+  if (s.termCover) c += 1000 * s.cost;
+  if (s.selfCare) c += 1500 * s.cost * s.scale;                   // gym, checkups, decent food
+  if (s.rentalFlat > 0) c += s.rentalFlat * 0.01;
+  return c;
+}
+// Sell investments to raise `need`: FDs first, then gold and equity (which owe 12.5% tax on the gain portion). Returns what could not be raised.
+function sellInv(s, need) {
+  const x = Math.min(need, s.fd); s.fd -= x; need -= x; s.sold = (s.sold || 0) + x;
+  if (need <= 0) return 0;
+  const eg = s.equity + s.gold, gainFrac = eg > 0 ? Math.max(0, 1 - s.basis / eg) : 0;
+  const gross = Math.min(eg, need / (1 - gainFrac * LTCG));             // sell enough to cover the tax too
+  const tax = gross * gainFrac * LTCG;
+  const g = Math.min(gross, s.gold); s.gold -= g; s.equity -= gross - g;
+  s.basis *= eg > 0 ? (eg - gross) / eg : 0;
+  s.ltcg += tax; s.ltcgYear += tax; s.sold += gross;
+  return Math.max(0, need - (gross - tax));
+}
+// Spend money: savings account first, then investments; whatever's left goes on the credit card. EPF/PPF/NPS are locked.
+function pay(s, amt) {
+  s.cash -= amt; if (s.cash >= 0) return false;
+  const need = sellInv(s, -s.cash); s.cash = 0;
+  if (need > 0) { s.debts.card += need; return true; }
+  return false;
+}
+function emi(L, r, n) { return L * r / (1 - Math.pow(1 + r, -n)); }
+function afford(s, amt) { return s.cash + s.fd + s.gold + s.equity >= amt; }
+
+// ---------- decision cards ----------
+// Each card fires once, at or after its age (so two cards never collide). when(s) gates it. ghost = index the textbook ghost picks.
+// Copy rules for cards: title ≤ 6 words, text ≤ 2 short sentences, and always anchored in the player's own numbers.
+const efm = s => (s.cash / (yearlyCosts(s) / 12)).toFixed(1);                 // months of emergency fund
+const liq = s => money(s.cash + s.equity + s.gold + s.fd);                      // cash + investments
+const fam = s => s.kids.length ? (s.kids.length > 1 ? 'two kids' : 'a child') : s.married ? 'a partner' : 'nobody depending on you';
+
+const CARDS = [
+  { age: 23, id: 'insure', title: 'Health cover?', text: '{p}/yr. You\'re 23 and healthy. One uninsured hospital stay costs about {h}.',
+    vars: s => ({ p: money(1800 * s.cost * s.scale), h: money(22000 * s.cost * Math.pow(1.03, s.age - START_AGE)) }),
+    opts: [
+      { label: 'Buy it', sub: '{p}/yr', apply: s => { s.insured = true; return 'Bought health insurance.'; } },
+      { label: 'Skip', sub: 'I\'m healthy', apply: s => 'Skipped health insurance.' },
+    ], ghost: 0 },
+
+  { age: 24, id: 'car', title: 'You need a car', text: 'The commute is eating your evenings. You have {c} in cash.',
+    vars: s => ({ a: money(25000 * s.cost * s.scale), b: money(8000 * s.cost * s.scale), c: money(s.cash) }),
+    opts: [
+      { label: 'New, on a 9% loan', sub: '{a} over 5 years', apply: s => { s.debts.car += 25000 * s.cost * s.scale; s.happy += 6; return 'Bought a new car on a 9% loan.'; } },
+      { label: 'New, cash', sub: '{a} now — shortfall goes on the card', apply: s => { const cc = pay(s, 25000 * s.cost * s.scale); s.happy += 6; return 'Bought a new car for cash' + (cc ? ' — part of it landed on the credit card.' : '.'); } },
+      { label: 'Used, cash', sub: '{b}. Works.', apply: s => { const cc = pay(s, 8000 * s.cost * s.scale); s.happy += 2; return 'Bought a used car' + (cc ? ' — partly on credit card.' : '.'); } },
+      { label: 'Metro and bike', sub: 'Free-ish, annoying', apply: s => { s.happy -= 3; return 'Skipped the car.'; } },
+    ], ghost: 2 },
+
+  { age: 26, id: 'crypto', title: 'A friend\'s hot coin', text: 'He\'s "up 300%" and wants you in for {a} — {pc} of your cash.',
+    vars: s => ({ a: money(10000 * s.cost * s.scale), pc: pct(Math.min(9.99, 10000 * s.cost * s.scale / Math.max(1, s.cash))) }),
+    opts: [
+      { label: 'All in', sub: '{a}. Could 4×, could go to zero.', apply: (s, d) => { const amt = 10000 * s.cost * s.scale; const cc = pay(s, amt); if (d.gamble < 0.25) { s.cash += amt * 4; s.happy += 8; return 'The coin 4×\'d. You feel like a genius.'; } s.happy -= 6; return 'The coin went to zero. ' + (cc ? 'You borrowed to buy it, too.' : 'Money gone.'); } },
+      { label: 'Pass', sub: '', apply: (s, d) => d.gamble < 0.25 ? 'The coin actually 4×\'d. Your friend won\'t shut up about it.' : 'The coin went to zero. Your friend has gone quiet.' },
+    ], ghost: 1 },
+
+  { age: 28, id: 'job', title: 'Startup offer: +25%', text: 'Better pay, less safety — about a 1-in-6 chance a year it folds. Your emergency fund: {ef} months.',
+    vars: s => ({ ef: efm(s) }),
+    opts: [
+      { label: 'Take it', sub: '+25% salary, real layoff risk', apply: s => { s.salary *= 1.25; s.riskyYears = 3; s.tenure = 0; return 'Joined the startup at +25% pay.'; } },
+      { label: 'Stay', sub: 'Steady', apply: s => 'Stayed in your stable job.' },
+    ], ghost: 1 },
+
+  { age: 29, id: 'term', when: s => s.married && s.age >= (s.marriedAt || 0) + 1, title: 'Term insurance?', text: '{c} cover for {p}/yr. Pays only if one of you dies. Right now there\'s {f}.',
+    vars: s => ({ c: money(TERM_COVER), p: money(1000 * s.cost * s.scale), f: fam(s) }),
+    opts: [
+      { label: 'Buy it', sub: '{p}/yr', apply: s => { s.termCover = true; s.coverSince = s.age; return 'Bought term life cover.'; } },
+      { label: 'Skip', sub: '"Nothing will happen to us"', apply: s => 'Skipped term insurance.' },
+    ], ghost: 0 },
+
+  { age: 30, id: 'house', title: 'Buy a flat?', text: '{p}. Down payment {d} — you have {l} liquid. EMI {m}/yr against {r}/yr in rent today.',
+    vars: s => { const p = 300000 * s.cost * s.scale; return { p: money(p), d: money(p * 0.2), m: money(emi(p * 0.8, RATES.mortgage, 20)), r: money(rentOf(s)), l: liq(s) }; },
+    opts: [
+      { label: 'Buy', sub: '20-year loan at 6%', can: s => afford(s, 300000 * s.cost * s.scale * 0.2), apply: s => { const p = 300000 * s.cost * s.scale; pay(s, p * 0.2); s.debts.mortgage = p * 0.8; s.mortgagePay = emi(p * 0.8, RATES.mortgage, 20); s.house = p; s.happy += 6; return 'Bought a flat for ' + money(p) + '.'; } },
+      { label: 'Keep renting', sub: 'Invest the difference — if you actually do', apply: s => 'Kept renting.' },
+    ], ghost: 0, ghostFallback: 1 },
+
+  { age: 31, id: 'hop31', when: s => !s.retired, title: 'Rival offer: +18%', text: '{t} years at your current job — {g}.',
+    vars: s => ({ t: s.tenure, g: s.tenure >= 5 ? 'leaving pays out ' + money(s.salary / 24 * Math.min(s.tenure, 20)) + ' gratuity' : 'no gratuity yet, it vests at 5' }),
+    opts: [
+      { label: 'Take it', sub: 'Tenure resets', apply: s => { if (s.tenure >= 5) { const g = s.salary / 24 * Math.min(s.tenure, 20); s.cash += g; } s.salary *= 1.18; s.tenure = 0; return 'Hopped jobs for +18%.'; } },
+      { label: 'Stay', sub: '', apply: s => 'Stayed loyal to the employer.' },
+    ], ghost: 1 },
+
+  { age: 33, id: 'chit', title: 'The building\'s chit fund', text: 'Put in {a}, get 20% a year. Everyone\'s in. Nobody regulates it.',
+    vars: s => ({ a: money(20000 * s.cost * s.scale) }),
+    opts: [
+      { label: 'Join', sub: '{a}', apply: s => { const a = 20000 * s.cost * s.scale; pay(s, a); s.chit = { amt: a, years: 3 }; return 'Joined the chit fund with ' + money(a) + '.'; } },
+      { label: 'Pass', sub: '', apply: s => 'Passed on the chit fund.' },
+    ], ghost: 1 },
+
+  { age: 35, id: 'mba', title: 'Part-time MBA?', text: '{c} on a 7% loan. About +30% salary in two years — on today\'s {sal}, that\'s +{gain}/yr.',
+    vars: s => ({ c: money(60000 * s.cost * s.scale), sal: money(s.salary), gain: money(s.salary * 0.3) }),
+    opts: [
+      { label: 'Do it', sub: 'Borrow {c}', apply: s => { s.debts.school += 60000 * s.cost * s.scale; s.mbaLeft = 2; return 'Started an MBA on a 7% loan.'; } },
+      { label: 'Skip', sub: '', apply: s => 'Passed on the MBA.' },
+    ], ghost: 1 },
+
+  { age: 37, id: 'mlm', title: 'Cousin\'s "business opportunity"', text: 'Starter kit {a}. Recruit five people. Family dinner is next week.',
+    vars: s => ({ a: money(6000 * s.cost * s.scale) }),
+    opts: [
+      { label: 'Buy the kit', sub: '{a}', apply: s => { pay(s, 6000 * s.cost * s.scale); s.mlmHit = s.age + 1; return 'Bought into the cousin\'s MLM.'; } },
+      { label: 'Decline', sub: 'Awkward dinner', apply: s => { s.happy -= 1; return 'Declined the cousin\'s MLM.'; } },
+    ], ghost: 1 },
+
+  { age: 38, id: 'vacation', title: 'A month in Europe', text: 'Your share {c}. You have {cash} in cash.',
+    vars: s => ({ c: money(9000 * s.cost * s.scale * (s.married ? 1.8 : 1)), cash: money(s.cash) }),
+    opts: [
+      { label: 'Go', sub: '{c}', apply: s => { const cc = pay(s, 9000 * s.cost * s.scale * (s.married ? 1.8 : 1)); s.happy += 8; return 'Took the trip of a lifetime' + (cc ? ' — on credit.' : '.'); } },
+      { label: 'Skip', sub: '', apply: s => { s.happy -= 2; return 'Skipped the big trip.'; } },
+    ], ghost: 1 },
+
+  { age: 40, id: 'rental', title: 'A flat to rent out?', text: '{p}, {d} down, 8.5% loan — EMI {m}/yr. Rent {r}/yr. Leverage cuts both ways.',
+    vars: s => { const p = 300000 * s.cost * s.scale; return { p: money(p), d: money(p * 0.25), m: money(emi(p * 0.75, RATES.rental, 20)), r: money(p * 0.03) }; },
+    opts: [
+      { label: 'Buy', sub: 'Needs {d}', can: s => afford(s, 300000 * s.cost * s.scale * 0.25), apply: s => { const p = 300000 * s.cost * s.scale; pay(s, p * 0.25); s.debts.rental = p * 0.75; s.rentalPay = emi(p * 0.75, RATES.rental, 20); s.rentalFlat = p; return 'Bought a rental flat for ' + money(p) + '.'; } },
+      { label: 'No — stick to funds', sub: 'Liquid, no tenants', apply: s => 'Passed on the rental flat.' },
+    ], ghost: 1 },
+
+  { age: 44, id: 'coop', title: '15% FD, "guaranteed"', text: 'A cooperative bank. Big banks pay 6.5%. Deposit insurance covers {d} per bank.',
+    vars: s => ({ a: money(50000 * s.cost * s.scale), d: money(DICGC) }),
+    opts: [
+      { label: 'Deposit', sub: '{a} at 15%', apply: s => { const a = 50000 * s.cost * s.scale; pay(s, a); s.coop = { amt: a, years: 2 }; return 'Deposited ' + money(a) + ' in the 15% cooperative bank.'; } },
+      { label: 'Stick to 6.5%', sub: '', apply: s => 'Passed on the 15% FD.' },
+    ], ghost: 1 },
+
+  { age: 45, id: 'side', title: 'Start a side business?', text: '{c} to launch. Half of these pay {i}/yr. Half go nowhere.',
+    vars: s => ({ c: money(30000 * s.cost * s.scale), i: money(15000 * s.cost * s.scale) }),
+    opts: [
+      { label: 'Launch', sub: '{c}, coin flip', apply: (s, d) => { const cc = pay(s, 30000 * s.cost * s.scale); if (d.gamble < 0.5) { s.sideIncome = 15000 * s.cost * s.scale; s.happy += 6; return 'Your side business works! Extra income every year.'; } s.happy -= 4; return 'The side business flopped' + (cc ? ', and you borrowed to fund it.' : '.'); } },
+      { label: 'Keep it a hobby', sub: '', apply: s => 'Kept the business idea as a hobby.' },
+    ], ghost: 1 },
+
+  { age: 46, id: 'parents', title: 'Parents\' pension falls short', text: '{a}/yr keeps them comfortable. They will never ask.',
+    vars: s => ({ a: money(4000 * s.cost * s.scale) }),
+    opts: [
+      { label: 'Support them', sub: '{a}/yr until they pass', apply: s => { s.parentsSupport = true; return 'Started supporting your parents monthly.'; } },
+      { label: 'Leave it to siblings', sub: 'It will come up at every wedding', apply: s => { s.happy -= 6; return 'Left your parents\' support to siblings.'; } },
+    ], ghost: 0 },
+
+  { age: 47, id: 'hop47', when: s => !s.retired, title: 'One last offer: +18%', text: '{t} years of tenure — {g}. Thirteen years to retirement.',
+    vars: s => ({ t: s.tenure, g: s.tenure >= 5 ? 'leaving pays out ' + money(s.salary / 24 * Math.min(s.tenure, 20)) + ' gratuity' : 'leaving forfeits gratuity' }),
+    opts: [
+      { label: 'Take it', sub: 'Tenure resets; less gratuity at 60', apply: s => { if (s.tenure >= 5) s.cash += s.salary / 24 * Math.min(s.tenure, 20); s.salary *= 1.18; s.tenure = 0; return 'Hopped jobs at 47 for +18%.'; } },
+      { label: 'Stay till retirement', sub: '', apply: s => 'Stayed till retirement.' },
+    ], ghost: 1 },
+
+  { age: 48, id: 'cosign', title: 'Guarantee a friend\'s loan?', text: '{c}. If they default, you pay. Your emergency fund: {ef} months.',
+    vars: s => ({ c: money(15000 * s.cost * s.scale), ef: efm(s) }),
+    opts: [
+      { label: 'Guarantee it', sub: '', apply: (s, d) => { s.happy += 3; if (d.gamble < 0.4) s.cosignHit = s.age + 2; return 'Guaranteed your friend\'s loan.'; } },
+      { label: 'Decline', sub: 'Awkward, safe', apply: s => { s.happy -= 3; return 'Declined to guarantee the loan.'; } },
+    ], ghost: 1 },
+
+  { age: 52, id: 'adviser', title: 'A "premium" adviser calls', text: 'Glossy brochure, hints of guaranteed returns, 3% a year in fees. Your funds: {v}.',
+    vars: s => ({ v: money(s.equity + s.gold + s.fd) }),
+    opts: [
+      { label: 'Move my money to him', sub: 'Same market, minus 3% every year', apply: s => { s.feeDrag = 0.03; s.happy += 1; return 'Moved your money to the 3%-fee adviser.'; } },
+      { label: 'No thanks', sub: '', apply: s => 'Turned down the high-fee adviser.' },
+    ], ghost: 1 },
+
+  { age: 55, id: 'glide', when: s => !s.retired, title: 'Five years to retirement', text: 'You\'re {eq}% in equity with {v} invested. A crash at 59 can\'t be waited out. De-risk?',
+    vars: s => ({ eq: s.equityPct, v: money(s.equity + s.gold + s.fd) }),
+    opts: [
+      { label: 'Glide to 40% equity', sub: 'Growth with a cushion', apply: s => { s.equityPct = 40; s.goldPct = Math.min(s.goldPct, 60); return 'Moved to 40% equity before retirement.'; } },
+      { label: 'Go conservative: 20%', sub: 'Sleep well, grow slowly', apply: s => { s.equityPct = 20; s.goldPct = Math.min(s.goldPct, 80); return 'Moved to 20% equity before retirement.'; } },
+      { label: 'Stay at {eq}%', sub: 'Ride it out', apply: s => 'Kept the equity allocation into retirement.' },
+    ], ghost: 0 },
+
+  { age: 56, id: 'dreamcar', title: 'The dream car', text: 'Wanted it since you were 20. {c}. Your corpus: {v}.',
+    vars: s => ({ c: money(45000 * s.cost * s.scale), v: liq(s) }),
+    opts: [
+      { label: 'Buy it', sub: '{c}', apply: s => { const cc = pay(s, 45000 * s.cost * s.scale); s.happy += 7; return 'Bought the dream car' + (cc ? ' — on credit.' : '.'); } },
+      { label: 'Rent one for a weekend', sub: 'Most of the joy', apply: s => { s.happy += 2; return 'Skipped the dream car.'; } },
+    ], ghost: 1 },
+
+  { age: 58, id: 'downsize', when: s => s.house > 0 && !s.retired, title: 'Downsize?', text: 'Sell for {v}, buy smaller for {h}, free up {g}.',
+    vars: s => ({ v: money(s.house), h: money(s.house * 0.5), g: money(s.house * 0.5 - s.debts.mortgage) }),
+    opts: [
+      { label: 'Downsize', sub: '+{g} to the corpus', apply: s => { const gain = s.house * 0.5 - s.debts.mortgage; s.debts.mortgage = 0; s.mortgagePay = 0; s.house *= 0.5; s.cash += gain; s.happy -= 1; return 'Downsized, freeing ' + money(gain) + '.'; } },
+      { label: 'Stay', sub: 'It\'s home', apply: s => { s.happy += 2; return 'Stayed in the family home.'; } },
+    ], ghost: 0 },
+
+  // ---- retirement ----
+  { age: 60, id: 'retire', when: s => s.retiredAt === RETIRE_AGE, title: 'How does the money come out?', text: 'Salary stops. Corpus {c}, costs about {k}/yr{p}.',
+    vars: s => ({ c: money(liquid(s) + locked(s)), k: money(retiredCosts({ ...s, retired: true })), a: money((liquid(s) + locked(s)) * 0.4 * 0.065), p: s.pension ? ', pension ' + money(s.salary * 0.5) + '/yr' : '' }),
+    opts: [
+      { label: 'Draw what I need (SWP)', sub: 'Flexible; exposed to bad early markets', apply: s => 'Chose a systematic withdrawal plan.' },
+      { label: 'Annuity on 40%', sub: 'Fixed {a}/yr for life. Never rises.', apply: s => { const amt = (liquid(s) + locked(s)) * 0.4; pay(s, amt); s.annuity = amt * 0.065; return 'Bought an annuity paying ' + money(s.annuity) + '/yr for life.'; } },
+      { label: 'Work part-time till 65', sub: '40% of salary, tiring', apply: s => { s.partTimeUntil = 65; return 'Kept working part-time till 65.'; } },
+    ], ghost: 0 },
+  { age: 65, id: 'kidhouse', when: s => s.kids.length > 0, title: 'Child needs a down payment', text: '{c}. Your corpus: {v}.',
+    vars: s => ({ c: money(60000 * s.cost * s.scale), v: liq(s) }),
+    opts: [
+      { label: 'Give it', sub: '{c}', apply: s => { pay(s, 60000 * s.cost * s.scale); s.happy += 5; return 'Gave your child ' + money(60000 * s.cost * s.scale) + ' for a flat.'; } },
+      { label: 'Say no, gently', sub: 'Your corpus is your dignity', apply: s => { s.happy -= 4; return 'Declined to fund your child\'s flat.'; } },
+    ], ghost: 1 },
+  { age: 70, id: 'move', title: 'Move somewhere cheaper?', text: 'Costs −20% for good. Less bustle, fewer friends nearby.',
+    opts: [
+      { label: 'Move', sub: '', apply: s => { s.cityMult *= 0.8; s.happy -= 2; return 'Moved somewhere cheaper at 70.'; } },
+      { label: 'Stay', sub: 'Your doctor, your chai place', apply: s => { s.happy += 2; return 'Stayed put at 70.'; } },
+    ], ghost: 1 },
+];
+
+// Marriage is asked every three years from 26 to 41 while you're single; children every three years from two years after the wedding, up to two kids, until 42.
+const MARRY_AGES = [26, 29, 32, 35, 38, 41];
+const MARRY_CARD = {
+  id: 'marry', title: 'Marriage?',
+  text: '{lead} They earn {sp}/yr. Two incomes, one rent, costs up about 45%. Then the wedding.',
+  vars: s => ({
+    lead: s.age <= 27 ? 'You\'ve met someone.' : s.age <= 30 ? 'Someone serious this time.' : s.age <= 33 ? 'Your parents have started asking.' : s.age <= 36 ? 'The rishta calls have begun.' : s.age <= 39 ? 'Most of your friends are married now.' : 'This is the last time it comes up.',
+    sp: money(s.salary * 0.6), m: money(25000 * s.cost * s.scale), g: money(80000 * s.cost * s.scale) }),
+  opts: [
+    { label: 'Simple wedding', sub: '{m}', apply: s => { s.married = true; s.marriedAt = s.age; s.spouseSalary = s.salary * 0.6; const cc = pay(s, 25000 * s.cost * s.scale); s.happy += 10; return 'Got married with a simple wedding' + (cc ? ' — partly on credit.' : '.'); } },
+    { label: 'Big fat wedding', sub: '{g}. Five days, everyone comes.', apply: s => { s.married = true; s.marriedAt = s.age; s.spouseSalary = s.salary * 0.6; const cc = pay(s, 80000 * s.cost * s.scale); s.happy += 14; return 'Threw a big fat wedding' + (cc ? ' — much of it on credit.' : '.'); } },
+    { label: 'Not yet', sub: '', apply: s => { s.happy -= s.age >= 35 ? 2 : 0; return s.age >= 41 ? 'Chose to stay single.' : 'Not married yet.'; } },
+  ], ghost: 0,
+};
+const KID_CARD = {
+  id: 'kid', title: '{t}', text: '{lead} About {k}/yr for 22 years, then college and a wedding.{tail}',
+  vars: s => ({
+    t: s.kids.length ? 'A second child?' : 'A child?',
+    lead: s.kids.length ? 'Your first is ' + (s.age - s.kids[0]) + '.' : s.age - (s.marriedAt || s.age) <= 2 ? 'Two years married.' : s.age >= 38 ? 'Time is getting shorter.' : 'The question comes up again.',
+    k: money(10000 * s.cost * s.scale), tail: s.kids.length ? ' Your costs are already ' + money(yearlyCosts(s)) + '/yr.' : ' Also: joy.' }),
+  opts: [
+    { label: 'Yes', sub: '', apply: s => { s.kids.push(s.age); s.happy += s.kids.length === 1 ? 12 : 8; return s.kids.length === 1 ? 'Welcomed your first child.' : 'Welcomed your second child.'; } },
+    { label: 'Not now', sub: '', apply: s => s.age >= 40 ? (s.kids.length ? 'Stopped at one child.' : 'Decided against children.') : 'Not now for a child.' },
+  ], ghost: 0,
+};
+const askMarry = s => !s.married && !s.retired && s.age <= 41 && (MARRY_AGES.includes(s.age) || (s.age === (s.startAge || START_AGE) + 1 && s.age > 27)) && !s.done['marry' + s.age];
+const EARLY_CARD = {
+  id: 'early', title: 'You could stop working',
+  text: 'Financial freedom {f}: your money already pays for your life. Retire at {a}? Pension and NPS shrink if you go before 60; the corpus has to last {y} years.',
+  vars: s => ({ f: pct(freedomOf(s)), a: s.age, y: END_AGE - s.age }),
+  opts: [
+    { label: 'Retire now', sub: 'Salary stops this year', apply: s => { s.earlyChoice = 'retire'; return 'Retired early at ' + s.age + '.'; } },
+    { label: 'Coast: part-time till 60', sub: '40% of salary, most of the freedom', apply: s => { s.earlyChoice = 'coast'; s.partTimeUntil = RETIRE_AGE; return 'Went part-time at ' + s.age + ', coasting to 60.'; } },
+    { label: 'Keep going', sub: 'Ask me again in a few years', apply: s => 'Kept working despite being free.' },
+  ], ghost: 2,
+};
+const askEarly = s => !s.retired && s.age >= 45 && s.age < RETIRE_AGE && freedomOf(s) >= 1 && (!s.earlyAskedAt || s.age - s.earlyAskedAt >= 4) && !s.done['early' + s.age];
+const askKid = s => s.married && s.kids.length < 2 && s.age <= 42 && s.age >= (s.marriedAt || 0) + 2 && (s.age - (s.marriedAt || 0) - 2) % 3 === 0 && !s.done['kid' + s.age];
+
+// Planner's notes: revealed the year after a decision, never before. They explain the principle, not the player's pick.
+const WHY = {
+  insure: 'Planners buy health cover before any investment — it\'s the one bill that can undo a decade of saving.',
+  car: 'A car loses value every year; financing it at 9% turns a cost into a bigger cost. Used-for-cash is the planner\'s pick.',
+  crypto: 'Speculation is fine at 1–2% of net worth — money you could lose entirely without changing your life. More than that is a bet, not a plan.',
+  marry: 'Two incomes and one rent is the strongest financial move most people ever make. Keep the wedding under three months\' income; nobody remembers what it cost.',
+  job: 'A risky job is affordable when the emergency fund covers six months. With less, the upside is real but the downside lands on a credit card.',
+  term: 'Term cover costs about 1% of income and exists for one reason: the people who depend on you. Buy it the day someone does.',
+  house: 'Buy when the down payment is there without selling investments and the EMI is under 35% of take-home. Renting and investing the difference is equally fine — if the difference is actually invested.',
+  hop31: 'Over a career, switching jobs usually pays more than loyalty. Gratuity is the tie-breaker, not the reason.', hop47: 'Late hops are about the pension math: a bigger final salary lifts gratuity and pension, a reset tenure cuts them.',
+  kid: 'Children cost about a fifth of household income for two decades. The college SIP is cheapest the year they\'re born.',
+  chit: 'A scheme that "always pays" is paying with new members\' money. The early payouts are the bait.',
+  mba: 'Education pays when the raise repays the loan inside five years. 7% for +30% salary does; a certificate rarely does.',
+  mlm: 'If the income comes from recruiting, you\'re the customer. Small money, big pattern.',
+  vacation: 'Experiences beat things for happiness per rupee. The rule: pay cash, never credit — then it\'s a yes.',
+  rental: 'Rental yield in India is ~3%; the case rests on appreciation and leverage. Never more than a third of net worth in one property.',
+  coop: 'A deposit paying double the big banks carries double the risk. Deposit insurance stops at ₹5 L.',
+  side: 'Businesses are the fastest way up and the fastest way down. Fund one only with money whose loss changes nothing.',
+  parents: 'Supporting parents is an expense to plan, not a shock. Budget it like an EMI and it fits; ignore it and it arrives as a crisis.',
+  cosign: 'Guaranteeing a loan is lending the money. Say yes only if you\'d give it as a gift.',
+  adviser: 'Fees compound like returns, in reverse. 1% a year is normal; 3% halves a lifetime\'s gains.',
+  glide: 'The five years either side of retirement are when a crash hurts most — you\'re selling into it. 40–50% equity is the textbook glide.',
+  dreamcar: 'Big purchases from a corpus are fine above 130% freedom. Below that, you\'re buying the car with your 75-year-old self\'s money.',
+  downsize: 'Home equity is the retirement money most people never use. Downsizing is the cleanest way to use it.',
+  retire: 'SWP keeps flexibility; an annuity buys certainty and loses to inflation; part-time work beats both because the corpus compounds untouched.',
+  kidhouse: 'A gift from a corpus is a permanent income cut. Help if the freedom meter stays above 120% afterwards.',
+  move: 'Cutting fixed costs 20% at 70 is worth more than any return you\'ll earn at 70.',
+  early: 'Freedom at 100% means the money works instead of you. Coasting part-time is the planner\'s favourite: most of the freedom, and the corpus keeps compounding untouched.',
+  crunch: 'This card exists because the emergency fund didn\'t. Six months of costs in cash and it never appears.',
+  hike: 'Lifestyle creep is why raises never show up in net worth. Save half of every raise and you\'ll still feel the rest.',
+  crash: 'Crashes recover; sold positions don\'t. Hold or buy — never sell what you won\'t need for five years.',
+  college: 'A fund started at birth costs a third of a loan taken at 18. Second best: the loan in the child\'s name — it\'s their asset.',
+  wedding: 'The wedding "everyone expects" comes out of your retirement. Budget it as a share of the corpus, not of relatives\' expectations.',
+};
+
+// The crunch: laid off with a thin cushion. Fires at the start of the year the layoff happens.
+const CRUNCH_CARD = {
+  id: 'crunch', title: 'Laid off', text: 'Six months without pay. {c} in the bank against {m}/month of bills and EMIs.',
+  vars: s => ({ c: money(s.cash), m: money((yearlyCosts(s) + s.mortgagePay + s.rentalPay) / 12) }),
+  opts: [
+    { label: 'Sell investments', sub: 'Tax on the gains', can: s => s.equity + s.gold + s.fd >= yearlyCosts(s) * 0.4, apply: s => 'Sold investments to get through the layoff.' },
+    { label: 'Personal loan at 14%', sub: 'Repaid over 3 years', apply: s => { s.crunchPlan = 'loan'; return 'Took a 14% personal loan to get through the layoff.'; } },
+    { label: 'Borrow from family', sub: 'No interest, some pride', apply: s => { s.crunchPlan = 'family'; s.happy -= 3; return 'Borrowed from family to get through the layoff.'; } },
+    { label: 'Cut to the bone', sub: 'Costs −30% this year, Frugal', apply: s => { s.crunchPlan = 'cut'; s.lifestyle = 'frugal'; s.happy -= 4; return 'Cut everything to get through the layoff.'; } },
+  ], ghost: 0, ghostFallback: 3,
+};
+
+// Fires the year after any promotion: the lifestyle-creep temptation, made visible.
+const HIKE_CARD = {
+  id: 'hike', title: 'Promoted: +12%', text: 'Household income is now {i}/yr. Everyone at this level lives a little bigger.',
+  vars: s => ({ i: money(household(s)) }),
+  opts: [
+    { label: 'Upgrade the lifestyle', sub: 'You earned it', can: s => s.lifestyle !== 'lavish', apply: s => { const o = ['frugal', 'normal', 'comfy', 'lavish']; s.lifestyle = o[Math.min(3, o.indexOf(s.lifestyle) + 1)]; s.happy += 4; return 'Upgraded lifestyle after a promotion.'; } },
+    { label: 'Bank the raise', sub: 'Invest 10% more of the surplus', apply: s => { s.investPct = Math.min(100, s.investPct + 10); s.happy += 1; return 'Banked the raise.'; } },
+    { label: 'Change nothing', sub: '', apply: s => 'Ignored the raise.' },
+  ], ghost: 1,
+};
+
+// Dynamic cards: crash, each kid's college, each kid's wedding.
+const CRASH_CARD = {
+  id: 'crash', title: 'Markets fell {r}', text: 'Your funds are worth {v}. Headlines say worse is coming.',
+  vars: s => ({ r: pct(-s.lastRet), v: money(s.equity + s.gold + s.fd) }),
+  opts: [
+    { label: 'Sell everything', sub: 'To cash; investing stops until you turn it back on', apply: s => { const all = s.equity + s.gold + s.fd; sellInv(s, all); s.cash += all - (s.equity + s.gold + s.fd); s.equity = s.gold = s.fd = 0; s.investPct = 0; return 'Panic-sold everything after the crash.'; } },
+    { label: 'Hold', sub: 'Keep the SIP running', apply: s => { s.crashesHeld++; return 'Held through the crash.'; } },
+    { label: 'Buy the dip', sub: 'Half your cash into equity', apply: s => { const a = s.cash * 0.5; s.cash -= a; s.equity += a; s.basis += a; s.crashesHeld++; return 'Bought the dip with ' + money(a) + '.'; } },
+  ], ghost: 1,
+};
+const COLLEGE_CARD = {
+  id: 'college', title: 'Your child got into college', text: '{c} over four years. You have {l} liquid.',
+  vars: s => ({ c: money(80000 * s.cost * s.scale), l: liq(s) }),
+  opts: [
+    { label: 'Pay it yourself', sub: '{c}', can: s => afford(s, 80000 * s.cost * s.scale), apply: s => { pay(s, 80000 * s.cost * s.scale); s.happy += 4; return 'Paid for your child\'s college.'; } },
+    { label: 'Loan in your name', sub: '9%, over 7 years', apply: s => { s.debts.kidloan += 80000 * s.cost * s.scale; s.happy += 2; return 'Took a 9% education loan for your child.'; } },
+    { label: 'They take their own loan', sub: 'Like you did', apply: s => { s.happy -= 4; return 'Your child took their own education loan.'; } },
+  ], ghost: 0, ghostFallback: 1,
+};
+const WEDDING_CARD = {
+  id: 'wedding', title: 'Your child\'s wedding', text: 'Modest is {m}. The one everyone expects is {g}. Your corpus: {v}.',
+  vars: s => ({ m: money(25000 * s.cost * s.scale), g: money(80000 * s.cost * s.scale), v: liq(s) }),
+  opts: [
+    { label: 'The one everyone expects', sub: '{g}', apply: s => { const cc = pay(s, 80000 * s.cost * s.scale); s.happy += 8; return 'Threw a grand wedding for your child' + (cc ? ' — partly on credit.' : '.'); } },
+    { label: 'Modest', sub: '{m}. Close family, good food.', apply: s => { const cc = pay(s, 25000 * s.cost * s.scale); s.happy += 5; return 'Gave your child a modest wedding' + (cc ? ' — partly on credit.' : '.'); } },
+    { label: 'They pay', sub: '', apply: s => { s.happy -= 2; return 'Let your child pay for their own wedding.'; } },
+  ], ghost: 1,
+};
+
+function cardFor(s, d) {
+  if (d && !s.retired && d.hazard < s.layoffBase + (s.riskyYears > 0 ? 0.12 : 0) && s.cash < yearlyCosts(s) * 0.25 && !s.done['crunch' + s.age]) return { ...CRUNCH_CARD, key: 'crunch' + s.age };
+  if (s.lastRet <= -0.2 && s.equity + s.gold + s.fd > 5000 && !s.done['crash' + s.age]) return { ...CRASH_CARD, key: 'crash' + s.age };
+  if (s.justPromoted && !s.retired && !s.done['hike' + s.age]) { s.justPromoted = false; return { ...HIKE_CARD, key: 'hike' + s.age }; }
+  if (askMarry(s)) return { ...MARRY_CARD, key: 'marry' + s.age };
+  if (askEarly(s)) { s.earlyAskedAt = s.age; return { ...EARLY_CARD, key: 'early' + s.age }; }
+  if (askKid(s)) return { ...KID_CARD, key: 'kid' + s.age };
+  for (const b of s.kids) {
+    if (s.age >= b + 18 && !s.done['college' + b]) return { ...COLLEGE_CARD, key: 'college' + b };
+    if (s.age >= b + 25 && !s.done['wedding' + b]) return { ...WEDDING_CARD, key: 'wedding' + b };
+  }
+  const c = CARDS.find(c => s.age >= (s.shift && s.shift[c.id] || c.age) && !s.done[c.id] && (!c.when || c.when(s)));
+  return c ? { ...c, key: c.id } : null;
+}
+function fill(str, vars) { return str.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? ''); }
+function applyCard(s, card, i, d) { s.done[card.key] = true; return card.opts[i].apply(s, d); }
+
+// ---------- one simulated year ----------
+function simulateYear(s, d) {
+  if (!s.retired && (s.earlyChoice === 'retire' || s.earlyChoice === 'coast')) { const m = []; retire(s, m); s.earlyChoice = null; const r = retiredYear(s, d); return [...m, ...r]; }
+  if (s.retired) return retiredYear(s, d);
+  const msgs = [];
+  const L = LIFE[s.lifestyle];
+
+  // --- income ---
+  let own = s.salary;
+  const layoffP = s.layoffBase + (s.riskyYears > 0 ? 0.12 : 0);
+  s.unemployed = d.hazard < layoffP;
+  if (s.unemployed) { own *= 0.5; msgs.push({ t: s.heir ? 'Bad year for the business. Half the usual income.' : 'Laid off. Six months without pay.', k: 'neg' }); s.happy -= 6; }
+  if (s.riskyYears > 0) s.riskyYears--;
+  let spouse = s.spouseSalary;
+
+  // random events
+  let hit = 0; const e = d.event;
+  if (e < 0.05 * (1.5 - s.health / 100)) { const c = (s.insured ? 1500 : 22000) * s.cost * Math.pow(1.03, s.age - START_AGE); hit += c; s.happy -= 3; msgs.push({ t: 'Hospital: ' + money(c) + (s.insured ? ' (insurance covered most of it).' : ' — no insurance.'), k: s.insured ? 'warn' : 'neg' }); }
+  else if (e < 0.13) { const c = 2500 * s.cost; hit += c; msgs.push({ t: 'Car / home repair: ' + money(c) + '.', k: 'warn' }); }
+  else if (e < 0.20) { const b = s.salary * 0.08; own += b; msgs.push({ t: 'Bonus at work: +' + money(b) + '.', k: 'pos' }); }
+  else if (e < 0.26) { s.salary *= 1.12; s.happy += 2; s.justPromoted = true; msgs.push({ t: 'Promoted! Salary +12%.', k: 'pos' }); }
+  else if (e < 0.28 && s.age > 40) { const g = 40000 * s.cost; s.cash += g; msgs.push({ t: 'A relative left you ' + money(g) + '.', k: 'pos' }); }
+  if (s.cosignHit === s.age) { const c = 15000 * s.cost; hit += c; s.happy -= 4; msgs.push({ t: 'Your friend defaulted. You pay the ' + money(c) + ' you guaranteed.', k: 'neg' }); s.cosignHit = 0; }
+  // schemes that work at first
+  if (s.chit) { if (s.chit.years > 0) { const r = s.chit.amt * 0.2; s.cash += r; s.chit.years--; msgs.push({ t: 'The chit fund paid out ' + money(r) + '. Everyone is very pleased.', k: 'pos' }); } else { s.happy -= 5; msgs.push({ t: 'The chit organiser has vanished. Your ' + money(s.chit.amt) + ' is gone; the three payouts were your own money coming back.', k: 'neg' }); s.chit = null; } }
+  if (s.coop) { if (s.coop.years > 0) { const r = s.coop.amt * 0.15; s.cash += r; s.coop.years--; msgs.push({ t: 'The cooperative bank paid 15% interest: ' + money(r) + '.', k: 'pos' }); } else { const back = Math.min(s.coop.amt, DICGC); s.cash += back; s.happy -= 5; msgs.push({ t: 'RBI has shut the cooperative bank. Deposit insurance returned ' + money(back) + ' of your ' + money(s.coop.amt) + '.', k: 'neg' }); s.coop = null; } }
+  if (s.mlmHit === s.age) { s.happy -= 4; msgs.push({ t: 'You recruited nobody. The starter kit is in a cupboard. Your cousin has stopped calling.', k: 'neg' }); s.mlmHit = 0; }
+  if (s.familyLoan) { hit += s.familyLoan; msgs.push({ t: 'Repaid the ' + money(s.familyLoan) + ' you borrowed from family.', k: 'warn' }); s.familyLoan = 0; }
+  s.tenure++;
+  // family shock (rare): spouse passes away
+  if (s.married && d.family < 0.002) {
+    s.married = false; s.spouseSalary = 0; s.happy -= 25;
+    if (s.termCover) { s.cash += TERM_COVER; msgs.push({ t: 'Your spouse passed away. The term cover paid ' + money(TERM_COVER) + '. Money was the one thing you did not have to worry about.', k: 'neg' }); }
+    else msgs.push({ t: 'Your spouse passed away. No term cover — you lost their income and got nothing.', k: 'neg' });
+  }
+
+  // --- costs & debt ---
+  let costs = yearlyCosts(s);
+  if (s.crunchPlan === 'cut') { costs *= 0.7; s.crunchPlan = null; }
+  else if (s.crunchPlan) { const bridge = costs * 0.5; s.cash += bridge; if (s.crunchPlan === 'loan') s.debts.personal += bridge; else s.familyLoan = bridge; s.crunchPlan = null; }
+  let mins = 0;
+  for (const k of Object.keys(s.debts)) s.debts[k] *= 1 + RATES[k];
+  const minOf = { student: Math.min(s.debts.student, 3200 * s.cost), card: s.debts.card * 0.25, car: Math.min(s.debts.car, 6500 * s.cost), school: Math.min(s.debts.school, 8000 * s.cost), mortgage: Math.min(s.debts.mortgage, s.mortgagePay), rental: Math.min(s.debts.rental, s.rentalPay), kidloan: s.debts.kidloan / 7, personal: s.debts.personal / 3 };
+  for (const k in minOf) { s.debts[k] -= minOf[k]; mins += minOf[k]; }
+  if (s.debts.mortgage < 1) s.mortgagePay = 0;
+  if (s.debts.rental < 1) s.rentalPay = 0;
+
+  // --- EPF, tax, 80C (80C only out of money you actually have left) ---
+  const epfEmp = s.pension ? 0 : own * 0.035;                  // ~12% of basic pay; employer adds about the same to EPF (rest goes to pension)
+  s.epf += epfEmp * 2;
+  const rentalIncome = s.rentalFlat * 0.03;
+  const spouseTax = incomeTax(Math.max(0, spouse - STD_DED));
+  const taxable0 = Math.max(0, own - epfEmp - STD_DED);
+  const pre = own + spouse + s.sideIncome + rentalIncome - epfEmp - incomeTax(taxable0) - spouseTax - costs - hit - mins;
+  const c80 = s.c80 ? Math.min(C80_MAX, Math.max(0, pre), taxable0) : 0;
+  const nps = s.npsOn ? Math.min(NPS_MAX, Math.max(0, pre - c80), Math.max(0, taxable0 - c80)) : 0;
+  const taxable = Math.max(0, taxable0 - c80 - nps);
+  const tax = incomeTax(taxable) + spouseTax;
+  const saved = incomeTax(taxable0) - incomeTax(taxable);
+  s.taxPaid += tax; s.taxSaved += saved;
+  s.ppf += c80; s.nps += nps;
+  const takehome = own + spouse + s.sideIncome + rentalIncome - epfEmp - tax - c80 - nps;
+  msgs.push({ t: 'Income tax: ' + money(tax) + (c80 + nps > 0 ? ' (put ' + money(c80 + nps) + ' in ' + (nps > 0 ? 'PPF + NPS' : 'PPF') + ', saved ' + money(saved) + ' tax)' : '') + (epfEmp > 0 ? '. EPF: +' + money(epfEmp * 2) : '') + '.', k: '' });
+
+  // --- surplus ---
+  let surplus = takehome - costs - hit - mins;
+  if (surplus < 0) {
+    s.sold = 0; const cc = pay(s, -surplus);
+    msgs.push({ t: 'Spent ' + money(-surplus) + ' more than you earned' + (cc ? '. The gap went on the credit card at 24%.' : s.sold > 0 ? ' — had to sell ' + money(s.sold) + ' of investments to cover it.' : ', paid from savings.'), k: cc ? 'neg' : 'warn' });
+  } else {
+    if (s.payDebt && s.debts.card > 0 && s.equity + s.gold + s.fd > 0) {
+      const p = Math.min(s.debts.card, s.equity + s.gold + s.fd) * 0.95; s.debts.card -= p - sellInv(s, p);
+      msgs.push({ t: 'Sold ' + money(p) + ' of investments to clear credit-card debt.', k: 'warn' });
+    }
+    if (s.payDebt) {
+      // expensive debt only (card 24%, car 9%, child's education 9%), and only beyond a 3-month cash cushion
+      const cushion = Math.max(0, costs * 0.25 - s.cash);
+      let spare = Math.max(0, surplus - cushion);
+      for (const k of ['card', 'personal', 'car', 'kidloan']) {
+        if (spare <= 0) break;
+        const p = Math.min(spare, s.debts[k]); if (p > 0) { s.debts[k] -= p; spare -= p; surplus -= p; if (p > 500) msgs.push({ t: 'Paid ' + money(p) + ' extra off the ' + (k === 'kidloan' ? 'child\'s education' : k) + ' loan.', k: 'pos' }); }
+      }
+    }
+    const inv = surplus * s.investPct / 100;
+    s.equity += inv * s.equityPct / 100; s.gold += inv * s.goldPct / 100; s.fd += inv * (100 - s.equityPct - s.goldPct) / 100; s.basis += inv * (s.equityPct + s.goldPct) / 100;
+    s.cash += surplus - inv;
+    if (inv > 0) msgs.push({ t: 'Invested ' + money(inv) + ', kept ' + money(surplus - inv) + ' in savings.', k: 'pos' });
+    else if (surplus > 0) msgs.push({ t: 'Kept ' + money(surplus) + ' in savings.', k: '' });
+  }
+
+  if (s.ltcgYear > 100) { msgs.push({ t: 'Capital gains tax on what you sold: ' + money(s.ltcgYear) + '.', k: 'warn' }); } s.ltcgYear = 0;
+
+  // --- markets ---
+  const ret = d.ret - s.feeDrag;
+  s.equity *= 1 + ret; s.gold *= 1 + d.gold - s.feeDrag; s.fd *= 1.065 - s.feeDrag;
+  s.cash *= 1.03; s.epf *= 1.081; s.ppf *= 1.071; s.nps *= 1.09; s.house *= 1.04; s.rentalFlat *= 1.04;
+  const tot = s.equity + s.gold + s.fd;
+  if (tot > 0) { s.equity = tot * s.equityPct / 100; s.gold = tot * s.goldPct / 100; s.fd = tot - s.equity - s.gold; }
+  s.lastRet = d.ret;
+  if (d.ret <= -0.2) msgs.push({ t: 'Market crash: equity ' + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: 'neg' });
+  else if (d.ret >= 0.25) msgs.push({ t: 'Bull market: equity +' + pct(d.ret) + '.', k: 'pos' });
+  else if (tot > 0) msgs.push({ t: 'Markets: equity ' + (d.ret >= 0 ? '+' : '') + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: '' });
+
+  // --- bankruptcy: the card has swallowed a year's household income ---
+  if (s.debts.card > household(s)) {
+    s.bankruptcies++;
+    s.debts.card = 0; s.debts.car = 0; s.debts.school = 0; s.debts.kidloan = 0; s.debts.personal = 0;   // education loans survive
+    s.cash = 0; s.equity = 0; s.gold = 0; s.fd = 0;                                  // EPF/PPF are protected
+    if (s.house > 0) { s.house = 0; s.debts.mortgage = 0; s.mortgagePay = 0; }
+    if (s.rentalFlat > 0) { s.rentalFlat = 0; s.debts.rental = 0; s.rentalPay = 0; }
+    s.happy -= 20; s.lifestyle = 'frugal';
+    msgs.push({ t: 'BANKRUPT. Credit-card debt passed a full year of income. Assets seized (EPF/PPF protected), debts wiped except education loans, credit ruined. Court-ordered budget: lifestyle reset to Frugal.', k: 'neg' });
+  }
+
+  // --- growth & happiness ---
+  const nwBefore = s.history[s.history.length - 1];
+  s.salary *= 1 + s.growth; s.spouseSalary *= 1.035; s.cost *= 1 + INFL;
+  if (s.mbaLeft > 0 && --s.mbaLeft === 0) { s.salary *= 1.3; msgs.push({ t: 'MBA done. Salary +30%.', k: 'pos' }); }
+  s.happy += L.h - 0.5;                                        // life is wearing; you have to feed happiness
+  if (s.debts.card > 1000) s.happy -= 2;
+  for (const b of s.kids) if (s.age < b + 22) s.happy += 0.75;
+  if (s.married) s.happy += 0.5;
+  if (s.parentsSupport && s.age < 62) s.happy += 0.75;
+  if (s.cash >= yearlyCosts(s) * 0.25) s.happy += 0.5;         // security feels good
+  if (netWorth(s) > nwBefore) s.happy += 0.25;
+  if (s.lifestyle === 'frugal') s.yearsFrugal++;
+  s.happy = Math.max(0, Math.min(100, s.happy));
+  updateHealth(s, s.unemployed);
+
+  s.age++;
+  if (s.age === 40) { s.nwAt40 = netWorth(s); s.debtAt40 = Math.round(totalDebt(s)); }
+  if (s.age === RETIRE_AGE && !s.retired) retire(s, msgs);
+  s.history.push(netWorth(s));
+  return msgs;
+}
+
+// Health: lifestyle at both extremes, stress, age — and whether you look after yourself.
+function updateHealth(s, unemployed) {
+  let d = 0;
+  d += { frugal: -0.3, normal: 0, comfy: 0.1, lavish: -0.6 }[s.lifestyle];
+  if (s.selfCare) d += 0.9;
+  if (s.debts.card > 1000) d -= 0.8;
+  if (unemployed) d -= 1;
+  if (s.happy < 30) d -= 0.5; else if (s.happy >= 70) d += 0.3;
+  if (s.age >= 40) d -= 0.4; if (s.age >= 60) d -= 0.5;
+  s.health = Math.max(0, Math.min(100, s.health + d));
+}
+// Mortality from 70, driven by health: fit players reach 85 about three times in four; at health 20 it's closer to a coin flip.
+function deathHazard(s) { return s.age < 70 ? 0 : 0.003 + (s.age - 70) * 0.003 + Math.max(0, 60 - s.health) / 100 * 0.08; }
+
+// ---------- retirement: 60 → 85 ----------
+// EPF and PPF pay out, the salary stops, and the corpus has to last.
+function retire(s, msgs) {
+  s.retired = true; s.retiredAt = s.age;
+  const early = s.age < RETIRE_AGE;
+  const lump = s.epf + s.ppf;
+  s.epfAt60 = s.epf; s.ppfAt60 = s.ppf; s.npsAt60 = s.nps;
+  s.fd += lump; s.epf = 0; s.ppf = 0;
+  if (s.nps > 0) { const lumpShare = early ? 0.2 : 0.6; s.fd += s.nps * lumpShare; s.annuity += s.nps * (1 - lumpShare) * 0.065; msgs.push({ t: 'NPS ' + (early ? 'exited early' : 'matured') + ' at ' + money(s.nps) + ': ' + Math.round(lumpShare * 100) + '% paid out, the rest became an annuity of ' + money(s.nps * (1 - lumpShare) * 0.065) + '/yr.', k: early ? 'warn' : 'pos' }); s.nps = 0; }
+  if (!s.pension && s.tenure >= 5) { s.gratuity = Math.min(s.salary / 24 * Math.min(s.tenure, 20), 166667); s.cash += s.gratuity; msgs.push({ t: 'Gratuity for ' + s.tenure + ' years with your last employer: ' + money(s.gratuity) + '.', k: 'pos' }); }
+  s.sideIncome *= 0.5;
+  const P = PERSONAS[s.personaId];
+  s.pensionPay = P.pension ? s.salary * 0.5 * (early ? Math.max(0.5, 1 - (RETIRE_AGE - s.age) * 0.04) : 1) : 0;
+  // snapshot for the report card
+  const corpus = liquid(s), costs = retiredCosts(s);
+  const passive = corpus * 0.04 + s.rentalFlat * 0.02 + s.pensionPay;
+  s.at60 = { nw: netWorth(s), corpus, costs, passive, ready: passive / costs };
+  msgs.push({ t: 'You retired at ' + s.age + (early ? ' — early' : '') + '. EPF and PPF paid out ' + money(lump) + '. No more salary — the corpus of ' + money(corpus) + ' has to last ' + (END_AGE - s.age) + ' years.', k: 'pos' });
+}
+function medicalCosts(s) { return 3000 * s.cost * Math.pow(1.05, Math.max(0, s.age - RETIRE_AGE)) * (1.6 - s.health / 100) + (s.insured ? 3500 * s.cost : 0); }   // health inflation ~8%, senior premiums
+function retiredCosts(s) { return yearlyCosts({ ...s, kids: [], insured: false, termCover: false }) + medicalCosts(s); }
+
+function retiredYear(s, d) {
+  const msgs = [], L = LIFE[s.lifestyle];
+  // income
+  const partTime = s.partTimeUntil > s.age ? s.salary * 0.4 : 0;
+  const income = s.pensionPay + s.annuity + partTime + s.rentalFlat * 0.03 + s.sideIncome;
+  const tax = incomeTax(Math.max(0, s.pensionPay + s.annuity + partTime + s.sideIncome - STD_DED));
+  s.taxPaid += tax;
+  // costs and shocks
+  const costs = retiredCosts(s);
+  let hit = 0; const e = d.event;
+  if (e < 0.12 * (1.5 - s.health / 100)) { const c = (s.insured ? 3000 : 40000) * s.cost; hit += c; s.happy -= 3; msgs.push({ t: 'Hospital: ' + money(c) + (s.insured ? ' (insurance covered most of it).' : ' — no insurance, and premiums at this age are brutal.'), k: s.insured ? 'warn' : 'neg' }); }
+  else if (e < 0.20) { const c = 3000 * s.cost; hit += c; msgs.push({ t: 'Home repair: ' + money(c) + '.', k: 'warn' }); }
+  if (s.age >= 75 && s.age <= 77) { const c = (s.insured ? 8000 : 20000) * s.cost; hit += c; if (s.age === 75) { s.happy -= 6; msgs.push({ t: 'A serious illness. Long-term care will cost ' + money(c) + '/yr for three years' + (s.insured ? ', after insurance.' : '.'), k: 'neg' }); } }
+  // EMIs still due
+  let mins = 0;
+  for (const k of Object.keys(s.debts)) s.debts[k] *= 1 + RATES[k];
+  const minOf = { student: Math.min(s.debts.student, 3200 * s.cost), card: s.debts.card * 0.25, car: Math.min(s.debts.car, 6500 * s.cost), school: Math.min(s.debts.school, 8000 * s.cost), mortgage: Math.min(s.debts.mortgage, s.mortgagePay), rental: Math.min(s.debts.rental, s.rentalPay), kidloan: s.debts.kidloan / 7, personal: s.debts.personal / 3 };
+  for (const k in minOf) { s.debts[k] -= minOf[k]; mins += minOf[k]; }
+  // drawdown
+  const need = costs + hit + mins + tax - income;
+  if (need <= 0) { s.cash += -need; msgs.push({ t: 'Income ' + money(income) + ' covered costs of ' + money(costs + hit) + ' with ' + money(-need) + ' to spare.', k: 'pos' }); }
+  else {
+    let left = need, drawn = 0;
+    { const x = Math.min(left, s.cash); s.cash -= x; left -= x; drawn += x; } if (left > 0) { const before = left; left = sellInv(s, left); drawn += before - left; }
+    if (left > 0 && s.house > 0) { const got = s.house - s.debts.mortgage; s.house = 0; s.debts.mortgage = 0; s.mortgagePay = 0; s.cash += got; const x = Math.min(left, s.cash); s.cash -= x; left -= x; s.happy -= 6; msgs.push({ t: 'Ran out of liquid money. Sold the house for ' + money(got) + ' and moved to a rental.', k: 'neg' }); }
+    if (left > 0 && s.rentalFlat > 0) { const got = s.rentalFlat - s.debts.rental; s.rentalFlat = 0; s.debts.rental = 0; s.rentalPay = 0; s.cash += got; const x = Math.min(left, s.cash); s.cash -= x; left -= x; msgs.push({ t: 'Sold the rental flat for ' + money(got) + '.', k: 'warn' }); }
+    if (left > 0) {
+      if (!s.brokeAt) { s.brokeAt = s.age; s.happy -= 15; for (const k of ['card', 'kidloan', 'car', 'school', 'student']) s.debts[k] = 0; msgs.push({ t: 'THE MONEY RAN OUT at ' + s.age + '. ' + (s.kids.length ? 'Your children are covering your costs now.' : 'You are living on relatives\' charity.'), k: 'neg' }); }
+      else { s.happy -= 1.5; msgs.push({ t: 'Still dependent on ' + (s.kids.length ? 'your children' : 'relatives') + ' for ' + money(left) + '.', k: 'neg' }); }
+      s.lifestyle = 'frugal';
+    } else msgs.push({ t: 'Drew ' + money(drawn) + ' from the corpus' + (income > 0 ? ' on top of ' + money(income) + ' of income' : '') + '. ' + money(liquid(s)) + ' left.', k: liquid(s) < costs * 5 ? 'warn' : '' });
+  }
+  // markets
+  const ret = d.ret - s.feeDrag;
+  s.equity *= 1 + ret; s.gold *= 1 + d.gold - s.feeDrag; s.fd *= 1.065 - s.feeDrag; s.cash *= 1.03; s.house *= 1.04; s.rentalFlat *= 1.04;
+  const tot = s.equity + s.gold + s.fd;
+  if (tot > 0) { s.equity = tot * s.equityPct / 100; s.gold = tot * s.goldPct / 100; s.fd = tot - s.equity - s.gold; }
+  s.lastRet = d.ret;
+  if (s.ltcgYear > 100) msgs.push({ t: 'Capital gains tax on the withdrawal: ' + money(s.ltcgYear) + '.', k: 'warn' }); s.ltcgYear = 0;
+  if (d.ret <= -0.2) msgs.push({ t: 'Market crash: equity ' + pct(d.ret) + '. In retirement, this is when sequence risk bites.', k: 'neg' });
+  else if (tot > 0) msgs.push({ t: 'Markets: equity ' + (d.ret >= 0 ? '+' : '') + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: '' });
+  // happiness & time
+  const nwBefore = s.history[s.history.length - 1];
+  s.cost *= 1 + INFL;
+  s.happy += L.h - 0.5;
+  if (partTime) s.happy -= 1;
+  if (liquid(s) >= costs * 5) s.happy += 0.75;                  // five years of runway feels safe
+  if (s.kids.length) s.happy += 0.5;
+  if (netWorth(s) > nwBefore) s.happy += 0.25;
+  if (s.lifestyle === 'frugal') s.yearsFrugal++;
+  s.happy = Math.max(0, Math.min(100, s.happy));
+  updateHealth(s, false);
+  if (s.health < 35 && s.age % 3 === 0) msgs.push({ t: 'Your health is failing. Medical costs are climbing with it.', k: 'warn' });
+  s.age++;
+  if (d.family > 1 - deathHazard(s) && s.age < END_AGE) { s.dead = s.age; msgs.push({ t: 'You passed away at ' + s.age + ', ' + (s.kids.length ? 'with family around you' : 'quietly') + '. Health at the end: ' + Math.round(s.health) + '/100.', k: 'neg' }); }
+  s.history.push(netWorth(s));
+  return msgs;
+}
+
+// ---------- achievements ----------
+const ACHIEVEMENTS = [
+  { id: 'nocard', name: 'Card-free life', desc: 'Never carried credit-card debt', test: (p, ev) => !/credit card|on credit/.test(p.logText) },
+  { id: 'ghost', name: 'Ghostbuster', desc: 'Beat the textbook plan', test: (p, ev) => ev.nw >= ev.gnw },
+  { id: 'diamond', name: 'Diamond hands', desc: 'Held or bought through two or more crashes, never panic-sold', test: p => p.s.crashesHeld >= 2 && !/Panic-sold/.test(p.logText) },
+  { id: 'insured', name: 'Fully covered', desc: 'Health and term insurance both bought', test: p => p.s.insured && p.s.termCover },
+  { id: 'crorepati', name: 'Crorepati by 40', desc: 'Net worth of ₹1 Cr at 40', test: p => (p.s.nwAt40 || 0) >= 1e7 / 12 && p.s.history[40 - START_AGE - 1] !== null },
+  { id: 'debtfree40', name: 'Debt-free at 40', desc: 'No loans of any kind at 40', test: p => p.s.debtAt40 === 0 },
+  { id: 'outlived', name: 'Money outlived you', desc: 'Never ran out in retirement', test: p => !p.s.brokeAt },
+  { id: 'early', name: 'Retired early', desc: 'Stopped working before 60 and never ran out', test: p => p.s.retiredAt && p.s.retiredAt < RETIRE_AGE && !p.s.brokeAt },
+  { id: 'fit85', name: 'Fit at 85', desc: 'Reached 85 with health above 60', test: p => !p.s.dead && p.s.health > 60 },
+  { id: 'estate', name: 'Left a legacy', desc: 'Estate of ₹2 Cr or more at 85', test: (p, ev) => ev.nw >= 2e7 / 12 },
+  { id: 'happy', name: 'Happy ending', desc: 'Life satisfaction 80+ at 85', test: p => p.s.happy >= 80 },
+  { id: 'monk', name: 'Frugal monk', desc: 'Lived frugally for 20 years', test: p => p.s.yearsFrugal >= 20 },
+  { id: 'landlord', name: 'Landlord', desc: 'Owned a rental flat', test: p => /rental flat/.test(p.logText) },
+  { id: 'fullhouse', name: 'Full house', desc: 'Married, two kids, own home', test: p => p.s.kids.length >= 2 && /Bought a flat/.test(p.logText) && p.s.married },
+  { id: 'hardmode', name: 'Hard-mode survivor', desc: 'Grade B or better on a Hard start', test: (p, ev) => PERSONAS[personaId].diff === 'Hard' && 'SAB'.includes(ev.letter) },
+  { id: 'scamproof', name: 'Scam-proof', desc: 'Turned down the coin, the chit fund, the MLM, the 15% FD and the adviser', test: p => p.decisionText('crypto').startsWith('Pass') && p.decisionText('chit').startsWith('Pass') && p.decisionText('mlm').startsWith('Decline') && p.decisionText('coop').startsWith('Stick') && p.decisionText('adviser').startsWith('No') },
+  { id: 'lowtax', name: 'Tax ninja', desc: 'Used 80C and NPS every year you could', test: p => p.s.c80 && p.s.npsOn && (p.s.npsAt60 || 0) > 0 },
+  { id: 'loyal', name: 'Gratuity collector', desc: 'Collected a full gratuity at 60', test: p => (p.s.gratuity || 0) > 0 && p.s.tenure >= 20 },
+];
+function loadAch() { try { return JSON.parse(localStorage.getItem('moneylife.ach') || '[]'); } catch (e) { return []; } }
+function saveAch(ids) { try { localStorage.setItem('moneylife.ach', JSON.stringify(ids)); } catch (e) {} }
+function achievementsFor(p, ev) {
+  p.logText = p.log.map(e => e.t).join('\n');
+  p.decisionText = id => (p.decisions.find(d => d.id === id) || {}).label || '';
+  const had = loadAch(), got = ACHIEVEMENTS.filter(a => { try { return a.test(p, ev); } catch (e) { return false; } });
+  const fresh = got.filter(a => !had.includes(a.id)).map(a => a.id);
+  if (players.length === 1) saveAch([...new Set([...had, ...fresh])]);
+  return { got, fresh, total: ACHIEVEMENTS.length, collected: new Set([...had, ...got.map(a => a.id)]).size };
+}
+
+// ---------- the ghost: a boring textbook plan with the same luck ----------
+function ghostPolicy(g) { g.selfCare = true; g.lifestyle = g.brokeAt ? 'frugal' : 'normal'; g.investPct = g.cash >= yearlyCosts(g) * 0.5 ? 85 : 0; g.equityPct = g.retired ? 40 : g.age < 50 ? 70 : 50; g.goldPct = 10; g.payDebt = true; g.c80 = true; }
+function ghostYear(g, d) {
+  const c = cardFor(g, d);
+  if (c) {
+    let i = c.ghost;
+    if (c.id === 'kid' && g.kids.length >= 1) i = 1;
+    if (c.opts[i].can && !c.opts[i].can(g)) i = c.ghostFallback ?? i;
+    applyCard(g, c, i, d);
+  }
+  ghostPolicy(g);
+  simulateYear(g, d); g.dead = 0;
+}
+
+// ---------- game controller ----------
+let players = [], G, draws, seed, cp = 0, mode = 1, personaId = 'grad', startAgeSel = 22, chosenDreams = ['house', 'free55', 'trip'], myCall = 'beat', playerName = '';
+const $ = id => document.getElementById(id);
+const cur = () => players[cp];
+const COLORS = ['#f4c95d', '#5cc8e8'];
+
+function makePlayer(name) {
+  const s = newState(personaId, startAgeSel), P = PERSONAS[personaId];
+  return { name, s, pendingCard: null, pickedOpt: null, log: [], decisions: [], dreams: [...chosenDreams], dreamState: {}, call: myCall,
+    lastMsgs: [{ t: `Welcome to adulthood. ${P.name}: salary ${money(s.salary)}` + (s.debts.student ? `, education loan ${money(s.debts.student)}` : '') + `, ${money(s.cash)} in the bank.` + (s.kids.length ? ' And a toddler.' : '') + (P.pension ? ' No EPF — a government pension waits at 60.' : ' Your employer deducts EPF from your pay and matches it.'), k: '' }] };
+}
+
+function hashSeed(str) { let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function readYouForm() {
+  const Y = PERSONAS.you, sal = Math.max(5000, +$('ySal').value || 60000);
+  Y.salary = sal / 0.8;                                                  // take-home → gross, roughly
+  Y.cash = Math.max(0, +$('ySav').value || 0) / 12; Y.loan = Math.max(0, +$('yLoan').value || 0) / 12;
+  Y.married = $('yMar').value === '1'; const k = +$('yKids').value; const a = Math.min(50, Math.max(22, +$('yAge').value || 30));
+  Y.kidsAges = k ? (k === 1 ? [a - 5] : [a - 5, a - 8]) : null; Y.scale = Math.min(1.6, Math.max(0.5, Y.salary / 50000)); Y.startAge = a;
+  startAgeSel = a;
+}
+function rewindTo(age) {
+  const snap = snapshots[age]; if (!snap) return;
+  const p0 = players[0], ev0 = evaluate(p0);
+  prevLife = { history: p0.s.history.slice(), nw: ev0.nw, letter: ev0.letter, age, happy: p0.s.happy, dreams: (p0.dreams || []).filter(id => p0.dreamState[id] === true).length };
+  const d = JSON.parse(snap);
+  G = d.G; players = [{ ...d.p, pendingCard: null, pickedOpt: null, rewound: age }]; cp = 0;
+  for (const a in snapshots) if (+a > age) delete snapshots[a];
+  lastCardKey = null;
+  $('end').classList.add('hidden'); $('game').classList.remove('hidden'); window.scrollTo(0, 0);
+  toast('Rewound to ' + age + '. Same luck from here — different choices.');
+  beginTurn();
+}
+function startGame(sameSeed) {
+  snapshots = {}; prevLife = null;
+  playerName = ($('nameIn').value || '').trim().slice(0, 24);
+  if (personaId === 'you') readYouForm();
+  const typed = ($('seedIn').value || '').trim();
+  if (!sameSeed) seed = typed ? (/^\d+$/.test(typed) ? +typed : hashSeed(typed)) : (Math.random() * 2 ** 31) | 0;
+  draws = makeDraws(seed);
+  players = mode === 2 ? [makePlayer(playerName ? playerName : 'Player 1'), makePlayer('Player 2')] : [makePlayer(playerName || 'You')];
+  G = newState(personaId, startAgeSel); cp = 0;
+  $('start').classList.add('hidden'); $('end').classList.add('hidden'); $('game').classList.remove('hidden');
+  window.scrollTo(0, 0);
+  beginTurn();
+}
+
+let snapshots = {}, prevLife = null;
+function beginTurn() {
+  const p = cur();
+  if (players.length === 1 && !p.s.dead) snapshots[p.s.age] = JSON.stringify({ G, p: { name: p.name, s: p.s, log: p.log, decisions: p.decisions, lastMsgs: p.lastMsgs, dreams: p.dreams, dreamState: p.dreamState, call: p.call, milestones: p.milestones } });
+  p.pendingCard = cardFor(p.s, draws[p.s.age - START_AGE]); p.pickedOpt = null;
+  render();
+}
+
+// animate a money figure from its last value to the new one
+function tickMoney(el, value) {
+  const from = el._v ?? value, to = value; el._v = to;
+  if (from === to || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = money(to); return; }
+  const t0 = performance.now(), dur = 550;
+  cancelAnimationFrame(el._raf);
+  const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = money(from + (to - from) * e); if (k < 1) el._raf = requestAnimationFrame(step); };
+  el._raf = requestAnimationFrame(step);
+}
+let lastCardKey = null, skipping = false;
+
+function render() {
+  const p = cur(), s = p.s, P = PERSONAS[personaId];
+  $('turnName').innerHTML = players.length > 1 ? `<i style="background:${COLORS[cp]}"></i>${p.name}'s turn` : playerName ? `<span class="agename">${playerName}</span>` : '';
+  $('age').textContent = s.age; $('yearsLeft').textContent = s.dead ? 'passed away' : s.retired ? 'retired · ' + (END_AGE - s.age) + ' years to go' : (RETIRE_AGE - s.age) + ' years to retirement';
+  const prog = (s.age - START_AGE) / (END_AGE - START_AGE) * 100;
+  $('tlFill').style.width = prog + '%'; $('tlDot').style.left = prog + '%'; $('tlRetire').style.left = (RETIRE_AGE - START_AGE) / (END_AGE - START_AGE) * 100 + '%';
+  const nw = netWorth(s);
+  tickMoney($('nw'), nw); $('nw').className = 'big num ' + (nw < 0 ? 'neg' : '');
+  $('ghostNw').textContent = money(netWorth(G)) + (players.length > 1 ? ' · ' + players[1 - cp].name + ' ' + money(netWorth(players[1 - cp].s)) : '');
+  const delta = (id, now, invert) => { const pr = p.prev && p.prev[id]; const dv = pr === undefined ? 0 : now - pr; $(id).innerHTML = money(now) + (Math.abs(dv) > 200 ? `<small class="d ${(invert ? -dv : dv) > 0 ? 'up' : 'dn'}">${dv > 0 ? '▲' : '▼'} ${money(Math.abs(dv))}</small>` : ''); };
+  delta('cash', s.cash); delta('inv', s.equity + s.gold + s.fd);
+  $('locked').textContent = s.retired ? 'paid out' : money(locked(s) + s.nps);
+  $('home').textContent = s.house ? money(s.house) : 'renting';
+  $('rental').textContent = s.rentalFlat ? money(s.rentalFlat) : '—';
+  delta('debt', totalDebt(s), true); $('debt').className = 'v ' + (totalDebt(s) > 0 ? 'neg' : '');
+  $('salary').textContent = s.retired ? money(s.pensionPay + s.annuity + (s.partTimeUntil > s.age ? s.salary * 0.4 : 0) + s.rentalFlat * 0.03 + s.sideIncome) + ' (retired)' : money(household(s) + s.sideIncome);
+  const costs = s.retired ? retiredCosts(s) : yearlyCosts(s); $('costs').textContent = money(costs);
+  $('family').textContent = (s.married ? 'married' : 'single') + (s.kids.length ? ', ' + s.kids.length + (s.kids.length > 1 ? ' kids' : ' kid') : '');
+  const months = s.cash / (costs / 12);
+  const efk = months < 3 ? 'neg' : months < 6 ? 'warn' : 'pos';
+  $('ef').textContent = months.toFixed(1) + ' months'; $('ef').className = 'v ' + efk;
+  $('efGauge').className = 'gauge ' + efk; $('efGauge').querySelectorAll('i').forEach((el, i) => el.classList.toggle('on', months >= i + 1));
+  const mood = s.happy >= 80 ? 'thriving' : s.happy >= 60 ? 'content' : s.happy >= 40 ? 'coping' : s.happy >= 20 ? 'worn down' : 'miserable';
+  $('happyV').textContent = Math.round(s.happy) + ' · ' + mood; $('happyBar').style.width = s.happy + '%';
+  const hw = s.health >= 75 ? 'fit' : s.health >= 55 ? 'okay' : s.health >= 35 ? 'worn' : 'failing'; $('healthV').textContent = Math.round(s.health) + ' · ' + hw; $('healthBar').style.width = s.health + '%'; $('healthBar').style.background = s.health >= 55 ? 'linear-gradient(90deg,#2aa876,var(--pos))' : s.health >= 35 ? 'var(--warn)' : 'var(--neg)';
+  const fr = freedomOf(s); $('freeV').textContent = pct(Math.min(fr, 9.99)) + (fr >= 1 ? ' · free' : ''); $('freeBar').style.width = Math.min(100, fr * 100) + '%'; $('freeBarWrap').classList.toggle('full', fr >= 1);
+  $('dreamsRail').innerHTML = (p.dreams && p.dreams.length ? '<h3 class="eyebrow">' + (playerName && players.length === 1 ? playerName + "'s" : 'Your') + ' dreams</h3>' + p.dreams.map(id => { const st = p.dreamState[id]; return `<div class="dream ${st === true ? 'done' : st === false ? 'lost' : 'open'}"><i>${st === true ? '✓' : st === false ? '✕' : ''}</i>${DREAMS[id].name}</div>`; }).join('') : '');
+  if (render.lastAge !== s.age + ':' + cp) { render.lastAge = s.age + ':' + cp; const a = $('age'); a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); }
+
+  // ledger of last year
+  $('summaryTitle').innerHTML = (p.log.length || s.age > (P.startAge || START_AGE) ? 'Last year, age ' + (s.age - 1) : 'Welcome') + (p.pendingCard ? '' : '<span class="quiet">quiet year ahead · S to skip</span>');
+  if (render.ledgerVer !== p.ledgerVer + ':' + cp) { render.ledgerVer = p.ledgerVer + ':' + cp; $('summaryList').innerHTML = p.lastMsgs.map((m, i) => `<li class="${m.k} rise" style="--i:${i}">${m.t}</li>`).join(''); }
+  $('why').classList.toggle('hidden', !p.lastWhy);
+  if (p.lastWhy) $('whyText').innerHTML = `<b>${p.lastWhy.title}</b> — you chose <em>${p.lastWhy.pick}</em>. ${p.lastWhy.why}`;
+  if (!skipping && p.lastMsgs.some(m => /BANKRUPT|MONEY RAN OUT|Market crash|vanished|shut the cooperative/.test(m.t))) { const m = $('main'); m.classList.remove('shake'); void m.offsetWidth; m.classList.add('shake'); }
+
+  // first-run hints
+  let hintsSeen = false; try { hintsSeen = localStorage.getItem('moneylife.hints') === '1'; } catch (e) {}
+  $('hints').classList.toggle('hidden', hintsSeen || s.age !== (P.startAge || START_AGE) || cp !== 0);
+
+  // the decision card
+  if (p.pendingCard) {
+    const c = p.pendingCard, vars = c.vars ? c.vars(s) : {};
+    $('card').classList.remove('hidden');
+    $('cardEyebrow').textContent = 'Decision · age ' + s.age;
+    $('cardTitle').textContent = fill(c.title, vars); $('cardText').textContent = fill(c.text, vars);
+    $('cardOpts').innerHTML = c.opts.map((o, i) => {
+      const can = !o.can || o.can(s);
+      return `<button data-i="${i}" data-k="${i + 1}" ${can ? '' : 'disabled'} class="${p.pickedOpt === i ? 'picked' : ''}">${fill(o.label, vars)}<small>${fill(o.sub, vars)}${can ? '' : ' (you can\'t afford this)'}</small></button>`;
+    }).join('');
+    $('cardOpts').querySelectorAll('button').forEach(b => b.onclick = () => { p.pickedOpt = +b.dataset.i; render(); });
+    if (lastCardKey !== c.key + ':' + cp) { lastCardKey = c.key + ':' + cp; $('card').classList.remove('deal'); void $('card').offsetWidth; $('card').classList.add('deal'); }
+  } else { $('card').classList.add('hidden'); lastCardKey = null; }
+
+  // controls
+  $('lifeLabel').textContent = LIFE[s.lifestyle].label; $('lifeHint').textContent = LIFE[s.lifestyle].hint + ' ≈ ' + money(livingBase(s)) + '/yr' + (s.house ? '' : ' incl. rent ' + money(rentOf(s))) + '.';
+  $('lifeSeg').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.l === s.lifestyle));
+  $('investPct').value = s.investPct; $('investLabel').textContent = s.investPct + '%';
+  $('equityPct').value = s.equityPct; $('goldPct').value = s.goldPct;
+  $('investPct').style.setProperty('--p', s.investPct + '%'); $('equityPct').style.setProperty('--p', s.equityPct + '%'); $('goldPct').style.setProperty('--p', s.goldPct + '%');
+  $('alEq').style.width = s.equityPct + '%'; $('alGd').style.width = s.goldPct + '%'; $('alFd').style.width = (100 - s.equityPct - s.goldPct) + '%';
+  $('eqLabel').textContent = s.equityPct + '%'; $('goldLabel').textContent = s.goldPct + '%'; $('fdLabel').textContent = (100 - s.equityPct - s.goldPct) + '%';
+  $('selfCare').checked = s.selfCare; $('careLabel').textContent = money(1500 * s.cost * s.scale);
+  $('payDebt').checked = s.payDebt; $('c80').checked = s.c80; $('c80Label').textContent = money(C80_MAX); $('nps').checked = s.npsOn; $('npsLabel').textContent = money(NPS_MAX);
+
+  const need = p.pendingCard && p.pickedOpt === null;
+  $('btnNext').disabled = need || skipping; $('btnSkip').disabled = need || skipping;
+  $('note').textContent = need ? 'Make your decision above first (press 1–' + p.pendingCard.opts.length + ').' : s.retired ? 'Runway at this spend: ' + (liquid(s) / Math.max(1, costs - s.pensionPay - s.annuity)).toFixed(1) + ' years, before returns' : 'Household income ' + money(household(s)) + ' · costs ≈ ' + money(costs) + ' · EMIs ≈ ' + money(s.mortgagePay + s.rentalPay);
+  $('log').innerHTML = p.log.slice().reverse().map(e => `<div><b>Age ${e.age}</b>${e.t}</div>`).join('');
+  $('legend').innerHTML = players.map((q, i) => `<span><i style="background:${COLORS[i]}"></i>${q.name}</span>`).join('') + '<span><i style="background:var(--ghostc)"></i>Ghost (textbook plan, same luck)</span>' + (prevLife ? '<span><i style="background:var(--teal)"></i>Your earlier life (rewound at ' + prevLife.age + ')</span>' : '');
+  drawChart($('chart'));
+}
+
+function toast(t, k) { const el = document.createElement('div'); el.className = 'toast ' + (k || ''); el.textContent = t; $('toasts').appendChild(el); setTimeout(() => el.remove(), 3700); }
+function nextYear() {
+  const p = cur(), s = p.s, d = draws[s.age - START_AGE];
+  p.prev = { cash: s.cash, inv: s.equity + s.gold + s.fd, debt: totalDebt(s) };
+  const nwBefore = netWorth(s), debtBefore = totalDebt(s);
+  if (p.pendingCard) {
+    const c = p.pendingCard, vars = c.vars ? c.vars(s) : {};
+    p.decisions.push({ age: s.age, key: c.key, id: c.id, opt: p.pickedOpt, label: fill(c.opts[p.pickedOpt].label, vars) });
+    const m = applyCard(s, c, p.pickedOpt, d); if (m) p.log.push({ age: s.age, t: m, k: 'choice' });
+    p.lastWhy = WHY[c.id] ? { title: fill(c.title, vars), why: WHY[c.id], pick: fill(c.opts[p.pickedOpt].label, vars) } : null;
+  } else { p.lastWhy = null;
+  }
+  p.lastMsgs = simulateYear(s, d); p.ledgerVer = (p.ledgerVer || 0) + 1;
+  if (cp === 0) ghostYear(G, d);                               // the ghost lives one year per round
+  {
+    p.milestones = p.milestones || {};
+    const who = players.length > 1 ? p.name + ': ' : '';
+    if (!p.milestones.crore && nwBefore < 1e7 / 12 && netWorth(s) >= 1e7 / 12) { p.milestones.crore = 1; toast(who + 'Crorepati. Net worth just crossed ' + money(1e7 / 12) + '.', 'pos'); }
+    if (!p.milestones.debtfree && debtBefore > 0 && totalDebt(s) <= 0 && s.age > (PERSONAS[personaId].startAge || START_AGE) + 1) { p.milestones.debtfree = 1; toast(who + 'Debt-free. Not a rupee owed to anyone.', 'pos'); }
+    if (s.retiredAt === s.age - 1 || (s.age === RETIRE_AGE && s.retiredAt === RETIRE_AGE)) toast(who + 'Retired at ' + s.retiredAt + '. Now the corpus has to last.');
+    if (p.lastMsgs.some(m => /BANKRUPT/.test(m.t))) toast(who + 'Bankrupt. Assets seized, lifestyle reset.', 'neg');
+    if (p.lastMsgs.some(m => /MONEY RAN OUT/.test(m.t))) toast(who + 'The money ran out at ' + (s.age - 1) + '.', 'neg');
+    if (!p.milestones.free && freedomOf(s) >= 1 && !s.retired) { p.milestones.free = 1; toast(who + 'Financially free. Your money now pays for your life — work is optional.', 'pos'); }
+    for (const [id, r] of updateDreams(p)) toast(who + (r ? 'Dream achieved: ' : 'Dream lost: ') + DREAMS[id].name, r ? 'pos' : 'neg');
+  }
+  p.lastMsgs.filter(m => m.k === 'neg' || m.k === 'pos' && !/Invested|Paid/.test(m.t)).forEach(m => p.log.push({ age: s.age - 1, t: m.t, k: m.k }));
+  if (players.every(q => q.s.age >= END_AGE || q.s.dead)) { clearSave(); return endGame(); }
+  if (players.length > 1) { cp = 1 - cp; if (cur().s.age >= END_AGE || cur().s.dead) cp = 1 - cp; }
+  saveGame();
+  beginTurn();
+  if (!skipping && window.innerWidth < 820) $('summary').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// auto-advance quiet years until someone has a decision to make
+async function skipToDecision() {
+  if ($('btnSkip').disabled) return;
+  skipping = true;
+  for (let i = 0; i < 70; i++) {
+    nextYear();
+    if ($('game').classList.contains('hidden') || cur().pendingCard) break;
+    if (cur().s.dead) break;
+    render();
+    await new Promise(r => setTimeout(r, 110));
+  }
+  skipping = false;
+  if (!$('game').classList.contains('hidden')) render();
+}
+
+// ---------- save & resume ----------
+function saveGame() {
+  try {
+    localStorage.setItem('moneylife.save', JSON.stringify({ seed, mode, personaId, startAgeSel, cp, symbol, G, you: PERSONAS.you, playerName, players: players.map(p => ({ name: p.name, s: p.s, log: p.log, decisions: p.decisions, lastMsgs: p.lastMsgs })) }));
+  } catch (e) {}
+}
+function clearSave() { try { localStorage.removeItem('moneylife.save'); } catch (e) {} }
+function loadSave() { try { return JSON.parse(localStorage.getItem('moneylife.save') || 'null'); } catch (e) { return null; } }
+function resumeGame() {
+  const d = loadSave(); if (!d) return;
+  seed = d.seed; mode = d.mode; personaId = d.personaId; startAgeSel = d.startAgeSel || 22; cp = d.cp; symbol = d.symbol || symbol; playerName = d.playerName || '';
+  if (d.you) Object.assign(PERSONAS.you, d.you, { desc: PERSONAS.you.desc });
+  draws = makeDraws(seed); G = d.G;
+  players = d.players.map(p => ({ ...p, pendingCard: null, pickedOpt: null }));
+  $('start').classList.add('hidden'); $('end').classList.add('hidden'); $('game').classList.remove('hidden');
+  window.scrollTo(0, 0);
+  beginTurn();
+}
+function refreshResume() {
+  const d = loadSave(), b = $('btnResume');
+  b.classList.toggle('hidden', !d);
+  if (d) b.textContent = 'Continue — ' + PERSONAS[d.personaId].name + ', age ' + d.players[d.cp].s.age;
+}
+
+// ---------- chart ----------
+function drawChart(svg) {
+  const W = 1000, H = 230, P = 12;
+  const series = [...players.map((p, i) => ({ h: p.s.history, c: COLORS[i], w: 3, fill: i === 0 })), { h: G.history, c: '#8f97b3', w: 2, dash: '6 5' }, ...(prevLife ? [{ h: prevLife.history, c: '#5cc8e8', w: 2, dash: '2 5' }] : [])];
+  const all = series.flatMap(x => x.h).filter(v => v !== null);
+  const n = END_AGE - START_AGE + 1;
+  const lo = Math.min(0, ...all), hi = Math.max(10000, ...all) * 1.06;
+  const x = i => P + i * (W - 2 * P) / (n - 1), y = v => H - P - (v - lo) * (H - 2 * P) / (hi - lo);
+  const pts = h => { const out = []; h.forEach((v, i) => { if (v !== null) out.push([x(i), y(v), i, v]); }); return out; };
+  const path = ps => ps.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+  const grid = []; for (let a = START_AGE + 5; a < END_AGE; a += 5) grid.push(`<line x1="${x(a - START_AGE)}" x2="${x(a - START_AGE)}" y1="${P}" y2="${H - P}" stroke="#1b2237" stroke-width="1"/>`);
+  let body = grid.join('') + `<line x1="${P}" x2="${W - P}" y1="${y(0)}" y2="${y(0)}" stroke="#33405f" stroke-width="1"/>
+    <line x1="${x(RETIRE_AGE - START_AGE)}" x2="${x(RETIRE_AGE - START_AGE)}" y1="${P}" y2="${H - P}" stroke="#33405f" stroke-width="1" stroke-dasharray="3 4"/>
+    <defs><linearGradient id="gfill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4c95d" stop-opacity=".28"/><stop offset="1" stop-color="#f4c95d" stop-opacity="0"/></linearGradient></defs>`;
+  let endPt = null;
+  for (const se of series.slice().reverse()) {
+    const ps = pts(se.h); if (!ps.length) continue;
+    if (se.fill) body += `<path d="${path(ps)} L${ps[ps.length - 1][0].toFixed(1)} ${y(lo)} L${ps[0][0].toFixed(1)} ${y(lo)} Z" fill="url(#gfill)" stroke="none"/>`;
+    body += `<path d="${path(ps)}" fill="none" stroke="${se.c}" stroke-width="${se.w}" ${se.dash ? `stroke-dasharray="${se.dash}"` : ''} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    if (se.fill) { endPt = ps[ps.length - 1]; body += `<circle cx="${endPt[0]}" cy="${endPt[1]}" r="5" fill="${se.c}" stroke="#0d1120" stroke-width="2" vector-effect="non-scaling-stroke"/>`; }
+  }
+  svg.innerHTML = body;
+  const box = svg.parentElement;
+  const yl = box.querySelector('.ylab'); if (yl) yl.textContent = money(hi / 1.06, 1);
+  const el = box.querySelector('.endlab');
+  if (el && endPt) { el.textContent = money(endPt[3]); el.style.left = (endPt[0] / W * 100) + '%'; el.style.top = (endPt[1] / H * 100) + '%'; el.style.display = ''; } else if (el) el.style.display = 'none';
+  const xt = box.nextElementSibling;
+  if (xt && xt.classList.contains('xticks')) { const t = []; for (let a = START_AGE; a <= END_AGE; a += 9) t.push(`<span>${a}</span>`); xt.innerHTML = t.join(''); }
+}
+
+// ---------- evaluation ----------
+function evaluate(p) {
+  const s = p.s, nw = netWorth(s), gnw = netWorth(G), at60 = s.at60 || { nw: 0, corpus: 0, costs: 1, passive: 0, ready: 0 };
+  let letter, title;
+  if (s.dead && !s.at60) { letter = nw > 0 ? 'C' : 'F'; title = `You passed away at ${s.dead}, before retirement, leaving ${money(nw)}.`; }
+  else if (s.dead && !s.brokeAt) { letter = nw >= gnw * 0.5 ? 'A' : 'B'; title = `You passed away at ${s.dead} with ${money(nw)} to your name — the money outlived you.`; if (nw >= gnw && s.happy >= 60) letter = 'S'; }
+  else if (s.brokeAt) {
+    if (s.brokeAt < 70) { letter = 'F'; title = `The money ran out at ${s.brokeAt}.`; }
+    else if (s.brokeAt < 75) { letter = 'D'; title = `The money ran out at ${s.brokeAt}. Fifteen years short.`; }
+    else if (s.brokeAt < 80) { letter = 'C'; title = `The money ran out at ${s.brokeAt}. So close.`; }
+    else { letter = 'B'; title = `The money ran out at ${s.brokeAt} — almost made it.`; }
+  } else if (nw >= gnw && s.happy >= 60) { letter = 'S'; title = 'Your money outlived you, you were happy, and you beat the textbook.'; }
+  else if (nw >= gnw * 0.5 || nw >= at60.costs * 5) { letter = 'A'; title = 'Your money outlived you. Comfortably.'; }
+  else { letter = 'B'; title = 'Your money outlived you — just.'; }
+  const order = ['S', 'A', 'B', 'C', 'D', 'F'];
+  if (s.happy < 30 && letter !== 'F') { letter = order[order.indexOf(letter) + 1]; title += ' But was it worth being miserable?'; }
+  if (s.bankruptcies) letter = order[Math.min(5, order.indexOf(letter) + 1)];
+  return { nw, gnw, at60, ready: at60.ready, corpus: at60.corpus, letter, title, real: nw / s.cost, pension: s.pensionPay, dead: s.dead };
+}
+const GRADE_COLOR = { S: 'var(--happy)', A: 'var(--pos)', B: 'var(--teal)', C: 'var(--warn)', D: 'var(--warn)', F: 'var(--neg)' };
+
+function lessonsFor(p, ev) {
+  const s = p.s, nw = ev.nw, gnw = ev.gnw, les = [];
+  const logText = p.log.map(e => e.t).join('\n');
+  const good = t => les.push(`<div class="lesson good">✅ ${t}</div>`), bad = t => les.push(`<div class="lesson">⚠️ ${t}</div>`);
+  if (s.bankruptcies) bad(`You went bankrupt ${s.bankruptcies > 1 ? s.bankruptcies + ' times' : 'once'}. It always starts small: a deficit year, a card balance, then 24% interest doing the rest.`);
+  if (/credit card|on credit/.test(logText)) bad('You borrowed at 24% at least once. A balance at that rate doubles in about 3 years. An emergency fund of 3–6 months of costs is what stops it.');
+  else good('You never fell into credit-card debt. That one habit is worth more than any stock pick.');
+  if (/no insurance/.test(logText)) bad('An uninsured hospital bill hit you. Insurance is not an investment; it is a bet you want to lose cheaply.');
+  if (/Panic-sold/.test(logText)) bad('You sold after a crash. Crashes are when equity is on sale; selling then locks in the loss and misses the recovery.');
+  if (/Bought the dip/.test(logText)) good('You bought during a crash. That is where most long-term returns actually come from.');
+  if (/3%-fee adviser/.test(logText)) bad('A 3% fee sounds small. Over decades it eats roughly half your final portfolio.');
+  if (/coin went to zero\. (Money gone|You borrowed)/.test(logText)) bad('The crypto tip went to zero. Anything that promises 4× can also do ÷∞. Only bet what you can afford to lose.');
+  if (/9% loan/.test(logText)) bad('A new car on a 9% loan is a depreciating asset financed at a rate that beats most investments. Used-for-cash wins on money; the new car wins on feelings.');
+  if (!s.c80 || s.taxSaved < 1000) bad('You barely used 80C. That is tax you paid that the government offered to let you keep — for money you would invest anyway.');
+  else good(`80C saved you ${money(s.taxSaved)} in tax over your life, and the PPF corpus it built by 60 was ${money(s.ppfAt60 || s.ppf)}.`);
+  if ((s.epfAt60 || s.epf) > 0) good(`EPF quietly built ${money(s.epfAt60 || s.epf)} by 60 without you ever seeing the money. Automatic, invisible investing is the most reliable kind.`);
+  if (ev.pension) good(`Your pension pays ${money(ev.pension)}/yr for life — the one retirement asset you can't outlive.`);
+  if (s.investPct < 40) bad('You kept most of your surplus in a savings account. At 3% interest and 3% inflation, that money never grew at all.');
+  if (s.equityPct <= 20) bad('Almost no equity for a decades-long horizon. FDs and gold feel safe, but they barely beat inflation; equity is what compounds.');
+  if (s.goldPct >= 50) bad('Half your portfolio in gold. Gold is a hedge, not an engine — it has no earnings and no dividends.');
+  const at = 45, nwAt = s.history[at - START_AGE];
+  if (/Skipped term insurance/.test(logText) && s.kids.length) bad(`No term cover with a family. Had you died at ${at}, your family would have been left with ${money(nwAt)} and a lifetime of expenses.`);
+  else if (s.termCover && s.kids.length) good(`Term cover, with a family. Had you died at ${at}, your family would have had ${money(nwAt + TERM_COVER)} — the cover would have been most of it.`);
+  if (/rental flat/.test(logText) && s.rentalFlat) good(`The rental flat is worth ${money(s.rentalFlat)}${s.debts.rental > 0 ? ' with ' + money(s.debts.rental) + ' still owed' : ''}. Leverage worked — this time. Yield was only 3%; appreciation did the rest.`);
+  if (/education loan for your child/.test(logText)) bad('You borrowed at 9% for your child\'s college at the peak of your earning years. Starting a college fund at birth would have cost a fraction.');
+  if (/own education loan/.test(logText)) bad('Your child started life in debt, like you did. Not wrong — but note it was avoidable with an SIP started at their birth.');
+  if (/grand wedding/.test(logText)) bad('A grand wedding in your late fifties came straight out of your retirement corpus. Nobody remembers the buffet; everybody remembers being broke at 65.');
+  if (/Downsized/.test(logText)) good('You unlocked home equity by downsizing. A big house is a fine place to live and a terrible place to keep retirement money.');
+  if (gnw > nw * 1.5) bad(`The ghost beat you by ${money(gnw - nw)}. Same salary, same luck — the difference is entirely habits and decisions.`);
+  else if (nw >= gnw) good(`You beat the textbook plan by ${money(nw - gnw)}. Some of that is skill, some is nerve. Both count.`);
+  if (s.happy >= 70) good('You ended up genuinely happy. Money is a tool, not the score.');
+  if (s.happy < 35) bad('You ended up unhappy. Frugality that makes life joyless is its own kind of debt.');
+  if (/chit organiser has vanished/.test(logText)) bad('The chit fund paid you for three years — with your own money — and then vanished. The payouts are the bait. Unregulated schemes that "always pay" always pay until they don\'t.');
+  if (/RBI has shut/.test(logText)) bad('The 15% cooperative bank collapsed. Deposit insurance covers only ₹5 L per bank; the extra 8.5% was the price of the risk, and you paid it.');
+  if (/starter kit is in a cupboard/.test(logText)) bad('The MLM starter kit. Small money, but the pattern matters: if the product is recruiting, you are the product.');
+  if (s.ltcg > 0) (s.ltcg > (s.epfAt60 || 1) * 0.1 ? bad : good)(`You paid ${money(s.ltcg)} in capital gains tax over your life${/Panic-sold/.test(logText) ? ' — a good chunk of it from panic-selling.' : '. Every sale is a taxable event; the cheapest strategy is to not sell.'}`);
+  if (s.npsAt60 > 0) good(`NPS built ${money(s.npsAt60)} by 60 on top of EPF, with an extra tax deduction every year. 40% of it became a lifelong annuity.`);
+  if (s.gratuity > 0) good(`Gratuity paid ${money(s.gratuity)} at 60 for ${s.tenure} years of loyalty. Job-hopping would likely have paid more — but this was free.`);
+  if (/Hopped jobs/.test(logText)) { const n = (logText.match(/Hopped jobs/g) || []).length; good(`You hopped jobs ${n} time${n > 1 ? 's' : ''} for +18% each. Over a career, switching usually beats loyalty — the gratuity you gave up was small next to the compounding raises.`); }
+  if (/personal loan to get through the layoff/.test(logText)) bad('A 14% personal loan bridged the layoff. Cheaper than a credit card, dearer than an emergency fund would have been.');
+  if (/Borrowed from family/.test(logText)) bad('You borrowed from family during a layoff. Interest-free, but not cost-free — you paid in pride and they paid in worry.');
+  if (/Started supporting your parents/.test(logText)) good('You supported your parents for over fifteen years. It cost real money and it is the reason you could look at yourself in the mirror.');
+  if (s.brokeAt) bad(`You ran out at ${s.brokeAt}. At 60 your corpus covered ${pct(ev.ready)} of costs; ${ev.ready >= 1 ? 'that looked fine — but medical costs rise faster than inflation, and a bad market early in retirement drains a corpus you are also drawing from.' : 'that was never going to stretch 25 years.'}`);
+  else good(`Your money lasted all 25 years of retirement and you left ${money(nw)} behind. ${ev.ready >= 1.5 ? 'You could have spent more along the way.' : 'That was well managed.'}`);
+  if (s.annuity) bad(`Your annuity paid ${money(s.annuity)}/yr at 60 and still ${money(s.annuity)}/yr at 85 — by then it bought less than half as much. Fixed payouts and inflation are enemies.`);
+  if (s.partTimeUntil) good('Working part-time till 65 gave the corpus five extra years to compound before you touched it. Those are the most valuable years it has.');
+  if (/Sold the house/.test(logText)) bad('You had to sell your home in retirement to eat. Home equity is real money — but only if you plan to release it, not if you are forced to.');
+  if (/Upgraded lifestyle after a promotion/.test(logText)) { const n = (logText.match(/Upgraded lifestyle after a promotion/g) || []).length; bad(`You upgraded your lifestyle after ${n} promotion${n > 1 ? 's' : ''}. Each one felt earned. Together they are the reason the raises never showed up in your net worth.`); }
+  if (/Banked the raise/.test(logText)) good('You banked at least one raise instead of spending it. Saving a raise costs nothing — you were already living without it.');
+  if (/kept the equity allocation into retirement/i.test(logText) && s.equityPct >= 60) bad('At 55 you chose to keep a heavy equity load into retirement. It worked or it didn\'t — but the point of the glide path is that you should not need luck at 59.');
+  if (s.dead && s.dead < 78) bad(`You died at ${s.dead}. Health was ${Math.round(s.health)}/100 at the end${s.selfCare ? '' : ' and you never turned on "look after yourself"'}. Money planning assumes you live; health is what makes the assumption true.`);
+  else if (s.health >= 70) good(`Health ${Math.round(s.health)}/100 at the end. ${s.selfCare ? 'The gym money was the best-returning line in your budget.' : 'Mostly luck and a sane lifestyle — it usually takes both.'}`);
+  else if (s.health < 45) bad(`Health ${Math.round(s.health)}/100 at the end. It raised every hospital bill and every premium for twenty years — the quietest tax you paid.`);
+  if (s.retiredAt && s.retiredAt < RETIRE_AGE) good(`You retired at ${s.retiredAt}. ${s.brokeAt ? 'The corpus did not stretch — early retirement needs 130%+ freedom, not 100%.' : 'The money held. That is what the freedom meter was for.'}`);
+  if (s.retired && s.equityPct >= 70) bad('You kept 70%+ in equity through retirement. When you are withdrawing, a crash can\'t be waited out — some of it has to be sold at the bottom.');
+  return les.join('');
+}
+
+// ---------- the story of your life ----------
+const STORY = {
+  insure: ['took health cover early', 'skipped health insurance'],
+  car: ['bought a new car on loan', 'paid cash for a new car', 'drove a used car', 'stuck to the metro'],
+  crypto: ['went all in on a friend\'s coin', 'passed on the crypto tip'],
+  marry: ['married with a simple wedding', 'married with a big fat wedding', 'said not yet to marriage'],
+  job: ['jumped to a startup', 'stayed in the stable job'],
+  term: ['bought term cover', 'skipped term insurance'],
+  house: ['bought a flat', 'kept renting'],
+  kid: ['had a child', 'said not now to a child'],
+  mba: ['did an MBA on loan', 'skipped the MBA'],
+  vacation: ['took the trip of a lifetime', 'skipped the big trip'],
+  rental: ['bought a rental flat', 'stuck to mutual funds'],
+  parents: ['started supporting your parents', 'left your parents to your siblings'],
+  side: ['launched a side business', 'kept the business idea a hobby'],
+  cosign: ['guaranteed a friend\'s loan', 'declined to be guarantor'],
+  adviser: ['moved your money to a 3%-fee adviser', 'turned down the smooth adviser'],
+  dreamcar: ['bought the dream car', 'skipped the dream car'],
+  downsize: ['downsized the family home', 'stayed in the family home'],
+  crash: ['panic-sold in a crash', 'held through a crash', 'bought the dip in a crash'],
+  college: ['paid for a child\'s college', 'took a loan for a child\'s college', 'let a child take their own loan'],
+  wedding: ['threw a grand wedding for a child', 'gave a child a modest wedding', 'let a child pay for their own wedding'],
+  hike: ['upgraded the lifestyle after a promotion', 'banked a raise', 'ignored a raise'],
+  glide: ['glided to 40% equity before retiring', 'went conservative before retiring', 'kept a full equity load into retirement'],
+  hop31: ['hopped jobs for a raise', 'stayed loyal'], hop47: ['hopped jobs one last time', 'stayed till retirement'],
+  chit: ['joined a chit fund', 'passed on the chit fund'], mlm: ['bought into a cousin\'s MLM', 'declined the MLM'], coop: ['chased a 15% FD', 'stuck to boring FDs'],
+  crunch: ['sold investments to survive a layoff', 'took a personal loan to survive a layoff', 'borrowed from family during a layoff', 'cut to the bone during a layoff'],
+  retire: ['retired on a systematic withdrawal plan', 'bought an annuity', 'kept working part-time'],
+  early: ['retired early', 'went part-time to coast', 'kept working despite being free'],
+  kidhouse: ['helped a child buy a flat', 'declined to fund a child\'s flat'],
+  move: ['moved somewhere cheaper', 'stayed put'],
+};
+const EVENT_PHRASES = [[/MONEY RAN OUT/, 'the money running out'], [/Sold the house/, 'selling the house to survive'], [/serious illness/, 'a serious illness'], [/Laid off/, 'a layoff'], [/Hospital/, 'a hospital bill'], [/BANKRUPT/, 'bankruptcy'], [/crash/, 'a market crash'], [/spouse passed/, 'losing your spouse'], [/friend defaulted/, 'your friend\'s default'], [/Promoted/, 'a promotion'], [/relative left you/, 'an inheritance'], [/MBA done/, 'the MBA paying off'], [/side business works/, 'the side business taking off'], [/coin 4×/, 'the coin actually paying off']];
+function storyFor(p, ev) {
+  const s = p.s, P = PERSONAS[personaId], you = players.length > 1 ? p.name : (playerName || 'You');
+  const sa = s.history.findIndex(v => v !== null) + START_AGE, st = newState(personaId, sa);
+  const paras = [`${you} started at ${sa} as ${/^[aeiou]/i.test(P.name) ? 'an' : 'a'} ${P.name.toLowerCase()}: ${money(st.salary)} a year${st.debts.student > 0 ? ', ' + money(st.debts.student) + ' of education loan' : ''}${st.cash > 20000 ? ' and ' + money(st.cash) + ' already in the bank' : ''}.`];
+  const decades = [[0, 29, 'twenties'], [30, 39, 'thirties'], [40, 49, 'forties'], [50, 59, 'fifties'], [60, 69, 'sixties'], [70, 79, 'seventies'], [80, 85, 'eighties']];
+  for (const [a, b, name] of decades) {
+    const decs = p.decisions.filter(d => d.age >= a && d.age <= b && STORY[d.id]).filter((d, i, arr) => !((d.id === 'marry' && d.opt === 2 || d.id === 'kid' && d.opt === 1) && arr.slice(i + 1).some(e => e.id === d.id && e.opt === d.opt)));
+    let kidsSeen = p.decisions.filter(d => d.id === 'kid' && d.opt === 0 && d.age < a).length;
+    const dec = decs.map(d => `${d.id === 'kid' && d.opt === 0 ? (kidsSeen++ ? 'had a second child' : 'had a child') : STORY[d.id][d.opt]} at ${d.age}`);
+    const evs = []; const seen = new Set();
+    p.log.filter(e => e.age >= a && e.age <= b && e.k !== 'choice').forEach(e => { for (const [re, ph] of EVENT_PHRASES) if (re.test(e.t) && !seen.has(ph)) { seen.add(ph); evs.push(`${ph} at ${e.age}`); } });
+    if (!dec.length && !evs.length) continue;
+    const solo = you === 'You';
+    let t = `In ${solo ? 'your' : you + "'s"} ${name}, ${solo ? 'you' : 'they'}` + (dec.length ? ' ' + dec.join(', ') + '.' : ` mostly kept ${solo ? 'your' : 'their'} head down.`);
+    if (evs.length) t += ' Life served up ' + evs.join(', ') + '.';
+    paras.push(t);
+  }
+  paras.push(s.dead ? `At ${s.dead}: gone, with ${money(ev.nw)} left behind and ${Math.round(s.happy)}/100 on the happiness meter. ${ev.title}` : `At 85: ${money(ev.nw)} left behind, ${Math.round(s.happy)}/100 on the happiness meter. ${ev.title}`);
+  return paras;
+}
+
+// ---------- shareable result card ----------
+function downloadCard(p, ev) {
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'), s = p.s, P = PERSONAS[personaId];
+  x.fillStyle = '#0d1120'; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#141a2c'; x.beginPath(); x.roundRect(40, 40, W - 80, H - 80, 28); x.fill();
+  const txt = (t, X, Y, size, color, weight, align) => { x.font = `${weight || 400} ${size}px system-ui, Segoe UI, Roboto, sans-serif`; x.fillStyle = color; x.textAlign = align || 'left'; x.fillText(t, X, Y); };
+  const wrap = (t, X, Y, size, color, maxW, lh) => { x.font = `400 ${size}px system-ui, Segoe UI, Roboto, sans-serif`; x.fillStyle = color; x.textAlign = 'left'; let line = '', y = Y; for (const w of t.split(' ')) { const test = line ? line + ' ' + w : w; if (x.measureText(test).width > maxW && line) { x.fillText(line, X, y); line = w; y += lh; } else line = test; } if (line) x.fillText(line, X, y); return y + lh; };
+  x.font = '900 56px Fraunces, Georgia, serif'; txt('Money', 90, 130, 56, '#eceef7', 900); x.font = '900 56px Fraunces, Georgia, serif'; const mw = x.measureText('Money ').width; x.font = 'italic 500 56px Fraunces, Georgia, serif'; x.fillStyle = '#f4c95d'; x.textAlign = 'left'; x.fillText('Life', 90 + mw, 130);
+  txt((players.length > 1 || playerName ? p.name + ' · ' : '') + P.name + ' · seed ' + seed, 90, 175, 24, '#8b90a3');
+  x.fillStyle = '#1b2237'; x.beginPath(); x.roundRect(90, 215, 200, 200, 24); x.fill();
+  const col = { S: '#b48cff', A: '#3fd18f', B: '#5cc8e8', C: '#ff9f43', D: '#ff9f43', F: '#ff6b7a' }[ev.letter];
+  txt(ev.letter, 190, 365, 150, col, 900, 'center');
+  let y = wrap(ev.title, 320, 265, 34, '#e6e8ef', 640, 42);
+  const rows = [['Net worth at ' + (s.retiredAt || RETIRE_AGE), money(ev.at60.nw)], ['Left behind at 85', money(ev.nw)], ['Money ran out', s.brokeAt ? 'at ' + s.brokeAt : 'never'], ['Life satisfaction', Math.round(s.happy) + ' / 100'], ['vs. the textbook ghost', (ev.nw >= ev.gnw ? '+' : '−') + money(Math.abs(ev.nw - ev.gnw))]];
+  y = 470; for (const [k, v] of rows) { txt(k, 90, y, 26, '#8b90a3'); txt(v, W - 90, y, 28, '#e6e8ef', 700, 'right'); y += 46; }
+  // chart
+  const cx = 90, cy = y + 20, cw = W - 180, ch = 300;
+  x.fillStyle = '#1b2237'; x.beginPath(); x.roundRect(cx, cy, cw, ch, 16); x.fill();
+  const series = [{ h: G.history, c: '#8f97b3', w: 3 }, { h: s.history, c: col, w: 6 }];
+  const all = series.flatMap(q => q.h).filter(v => v !== null), lo = Math.min(0, ...all), hi = Math.max(1, ...all);
+  const n = END_AGE - START_AGE + 1, px = i => cx + 20 + i * (cw - 40) / (n - 1), py = v => cy + ch - 20 - (v - lo) * (ch - 40) / (hi - lo);
+  for (const q of series) { x.strokeStyle = q.c; x.lineWidth = q.w; x.lineJoin = 'round'; x.beginPath(); let pen = false; q.h.forEach((v, i) => { if (v === null) return; pen ? x.lineTo(px(i), py(v)) : x.moveTo(px(i), py(v)); pen = true; }); x.stroke(); }
+  txt('22', cx + 20, cy + ch - 4, 18, '#8b90a3'); txt('60', px(RETIRE_AGE - START_AGE), cy + ch - 4, 18, '#8b90a3', 400, 'center'); txt('85', cx + cw - 20, cy + ch - 4, 18, '#8b90a3', 400, 'right');
+  txt('you', cx + cw - 20, cy + 30, 20, col, 700, 'right'); txt('ghost', cx + cw - 20, cy + 56, 20, '#8b90a3', 700, 'right');
+  // story + badges
+  y = cy + ch + 60;
+  const story = storyFor(p, ev).slice(1, 4);
+  for (const t of story) { y = wrap(t, 90, y, 22, '#c3c7d4', W - 180, 30) + 8; if (y > H - 200) break; }
+  const got = ACHIEVEMENTS.filter(a => { try { return a.test(p, ev); } catch (e) { return false; } }).slice(0, 4).map(a => '🏅 ' + a.name).join('   ');
+  if (got) txt(got, 90, H - 120, 22, '#e6e8ef', 600);
+  txt('Play your own life: Money Life — a financial-planning simulator', 90, H - 70, 20, '#8b90a3');
+  const url = c.toDataURL('image/png');
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  const fname = 'money-life-' + ev.letter + '-' + seed + '.png';
+  ov.innerHTML = `<div class="ovbox"><img src="${url}" alt="Money Life result card"><div class="row" style="justify-content:space-between"><span class="muted">Right-click or long-press the image to save it, or use the button.</span><span><button class="ghost" id="ovSave">Save PNG</button> <button class="ghost" id="ovClose">Close</button></span></div></div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#ovClose').onclick = () => ov.remove(); ov.onclick = e => { if (e.target === ov) ov.remove(); };
+  ov.querySelector('#ovSave').onclick = async e => {
+    const btn = e.target; btn.disabled = true;
+    try {
+      const dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+      if (dl) { await c.toBlob(b => dl.save({ filename: fname, data: b }).then(() => btn.textContent = 'Saved').catch(err => { btn.textContent = err && err.code === 'declined' ? 'Save PNG' : 'Not available here'; })); }
+      else { const a = document.createElement('a'); a.href = url; a.download = fname; a.click(); btn.textContent = 'Saved'; }
+    } catch (err) { btn.textContent = 'Not available here'; }
+    setTimeout(() => { btn.disabled = false; }, 1500);
+  };
+}
+
+// ---------- ending ----------
+function endGame() {
+  const evs = players.map(evaluate);
+  let html = `<div class="sharerow"><button class="ghost" id="btnAgainTop">Live again</button><span class="muted" style="margin-left:auto">Seed <b class="num" style="color:var(--text)">${seed}</b></span></div>`;
+  if (players.length > 1) {
+    const [a, b] = players, [ea, eb] = evs;
+    const row = (k, f) => `<tr><td>${k}</td><td style="color:${COLORS[0]}">${f(ea, a)}</td><td style="color:${COLORS[1]}">${f(eb, b)}</td><td class="muted">${f({ nw: netWorth(G), corpus: (G.at60 || {}).corpus || 0, ready: (G.at60 || {}).ready ?? null, letter: '', happy: G.happy }, { s: G })}</td></tr>`;
+    html += `<div class="panel"><h2 style="margin:0 0 10px">${ea.nw > eb.nw ? a.name : eb.nw > ea.nw ? b.name : 'Nobody'} wins on money${(ea.nw > eb.nw) === (a.s.happy > b.s.happy) ? ' — and on happiness' : ' — but ' + (a.s.happy > b.s.happy ? a.name : b.name) + ' wins on happiness'}.</h2>
+      <div style="overflow-x:auto"><table class="cmp"><tr><th></th><th style="color:${COLORS[0]}">${a.name}</th><th style="color:${COLORS[1]}">${b.name}</th><th class="muted">Ghost</th></tr>
+      ${row('Grade', e => e.letter || '—')}${row('Net worth', e => money(e.nw))}${row('Retirement corpus', e => money(e.corpus))}${row('Readiness', e => e.ready === null ? '—' : pct(e.ready))}${row('Happiness', (e, p) => Math.round(p.s.happy))}${row('Bankruptcies', (e, p) => p.s.bankruptcies || 0)}</table></div></div>`;
+    // where the lives diverged
+    const keys = [...new Set([...a.decisions, ...b.decisions].map(d => d.key))];
+    const diffs = keys.map(k => { const da = a.decisions.find(d => d.key === k), db = b.decisions.find(d => d.key === k); if (!da || !db || da.opt === db.opt) return null; return `<div><b>Age ${da.age}</b> <span style="color:${COLORS[0]}">${da.label}</span> vs <span style="color:${COLORS[1]}">${db.label}</span></div>`; }).filter(Boolean);
+    let swing = { i: -1, v: 0 }; const ha = a.s.history, hb = b.s.history;
+    for (let i = 1; i < ha.length; i++) { if (ha[i] === null || hb[i] === null || ha[i - 1] === null) continue; const g = Math.abs((ha[i] - hb[i]) - (ha[i - 1] - hb[i - 1])); if (g > swing.v) swing = { i, v: g }; }
+    html += `<div class="panel diff"><h3 class="eyebrow">Where your lives diverged</h3>${diffs.length ? diffs.join('') : '<div class="muted">You made every decision the same way — the gap is pure habits.</div>'}
+      ${swing.i > 0 ? `<p class="muted">The biggest single-year swing between you was at age ${START_AGE + swing.i - 1}: the gap moved by ${money(swing.v)}.</p>` : ''}</div>`;
+  }
+  if (players.length === 1 && prevLife) {
+    const ev = evs[0], better = ev.nw > prevLife.nw;
+    html += `<div class="panel" style="border-color:var(--teal)"><h3 class="eyebrow" style="color:var(--teal)">Rewound at ${prevLife.age} — what changed</h3>
+      <div class="cmpgrid"><div><small>Earlier life</small><b>${prevLife.letter}</b><span>${money(prevLife.nw)} · happiness ${Math.round(prevLife.happy)} · ${prevLife.dreams} dreams</span></div><div><small>This life</small><b style="color:${better ? 'var(--pos)' : 'var(--neg)'}">${ev.letter}</b><span>${money(ev.nw)} · happiness ${Math.round(players[0].s.happy)} · ${(players[0].dreams || []).filter(id => players[0].dreamState[id] === true).length} dreams</span></div></div>
+      <p class="muted" style="margin:8px 0 0">Same luck both times. The difference — ${money(Math.abs(ev.nw - prevLife.nw))} ${better ? 'more' : 'less'} — is only what you did differently from ${prevLife.age} on.</p></div>`;
+  }
+  players.forEach((p, i) => {
+    const ev = evs[i], story = storyFor(p, ev);
+    updateDreams(p);
+    const dn = (p.dreams || []).filter(id => p.dreamState[id] === true).length;
+    const callRight = (p.call === 'beat') === (ev.nw >= ev.gnw);
+    if (p.dreams && p.dreams.length) html += `<div class="panel"><h3 class="eyebrow">${players.length > 1 ? p.name + "'s" : 'Your'} dreams · ${dn} of ${p.dreams.length}</h3><div class="dreamsum">${p.dreams.map(id => { const st = p.dreamState[id]; return `<div class="dream ${st === true ? 'done' : st === false ? 'lost' : 'open'}"><i>${st === true ? '✓' : st === false ? '✕' : ''}</i>${DREAMS[id].name}</div>`; }).join('')}</div>
+      <p class="muted" style="margin:10px 0 0">Your call at the start: <b style="color:var(--text)">${p.call === 'beat' ? "I'll beat the ghost" : 'The ghost will beat me'}</b>. ${callRight ? 'You were right.' : 'You were wrong — ' + (ev.nw >= ev.gnw ? 'you beat it.' : 'it beat you.')}</p></div>`;
+    html += `<div class="panel grade"><div class="letter" style="color:${GRADE_COLOR[ev.letter]}">${ev.letter}</div><div><h2 style="color:${players.length > 1 ? COLORS[i] : 'inherit'}">${players.length > 1 ? p.name + ' — ' : ''}${ev.title}</h2>
+      <div class="muted">At ${p.s.retiredAt || RETIRE_AGE} you ${p.s.retiredAt && p.s.retiredAt < RETIRE_AGE ? 'retired early with' : 'had'} ${money(ev.at60.nw)} and a corpus covering ${pct(ev.ready)} of costs. At 85 there is ${money(ev.nw)} left — that's ${money(ev.real)} in age-22 money. The ghost, with the same luck, has ${money(ev.gnw)}.</div></div></div>
+      <div class="cols">
+        <div class="panel"><h3 class="eyebrow">The numbers</h3>
+          <div class="stat"><span class="k">Retired at</span><span class="v">${p.s.retiredAt || '—'}</span></div>
+          <div class="stat"><span class="k">Net worth then</span><span class="v">${money(ev.at60.nw)}</span></div>
+          <div class="stat"><span class="k">Corpus then</span><span class="v">${money(ev.corpus)}</span></div>
+          <div class="stat"><span class="k">Readiness then</span><span class="v ${ev.ready >= 1 ? 'pos' : ev.ready >= .7 ? 'warn' : 'neg'}">${pct(ev.ready)} of costs covered</span></div>
+          ${ev.pension ? `<div class="stat"><span class="k">Pension</span><span class="v">${money(ev.pension)}/yr</span></div>` : ''}
+          ${p.s.annuity ? `<div class="stat"><span class="k">Annuity</span><span class="v">${money(p.s.annuity)}/yr, fixed</span></div>` : ''}
+          <div class="stat"><span class="k">Lived to</span><span class="v">${p.s.dead || END_AGE}</span></div>
+          <div class="stat"><span class="k">Health at the end</span><span class="v">${Math.round(p.s.health)} / 100</span></div>
+          <div class="stat"><span class="k">Money ran out</span><span class="v ${p.s.brokeAt ? 'neg' : 'pos'}">${p.s.brokeAt ? 'at ' + p.s.brokeAt : 'never'}</span></div>
+          <div class="stat"><span class="k">Estate left at 85</span><span class="v">${money(ev.nw)}</span></div>
+          <div class="stat"><span class="k">Property at 85</span><span class="v">${(p.s.house || p.s.rentalFlat) ? money(p.s.house + p.s.rentalFlat) : '—'}</span></div>
+          <div class="stat"><span class="k">Income tax paid, lifetime</span><span class="v">${money(p.s.taxPaid)}${p.s.taxSaved > 0 ? ' (80C saved ' + money(p.s.taxSaved) + ')' : ''}</span></div>
+          <div class="stat"><span class="k">Life satisfaction</span><span class="v">${Math.round(p.s.happy)} / 100</span></div>
+        </div>
+        <div class="panel"><h3 class="eyebrow">What this life taught you</h3>${lessonsFor(p, ev)}</div>
+      </div>
+      <div class="panel story"><h3 style="margin-top:0">The story of ${players.length > 1 ? p.name + "'s" : 'your'} life</h3>${story.map(t => `<p>${t}</p>`).join('')}
+        <button class="ghost" id="copy${i}">Copy story</button> <button class="ghost" id="card${i}">Result card (PNG)</button></div>`;
+    p.storyText = story.join('\n\n');
+    const ach = achievementsFor(p, ev);
+    html += `<div class="panel"><h3 class="eyebrow">Achievements <span style="font-weight:400;letter-spacing:0;text-transform:none">· ${ach.got.length} this life${players.length === 1 ? ', ' + ach.collected + '/' + ach.total + ' all time' : ''}</span></h3>
+      <div class="badges">${ACHIEVEMENTS.map(a => { const g = ach.got.includes(a); return `<div class="badge ${g ? 'got' : ''} ${ach.fresh.includes(a.id) ? 'fresh' : ''}"><b>${ach.fresh.includes(a.id) ? '<span class="new">NEW</span>' : ''}${g ? '🏅' : '🔒'} ${a.name}</b><small>${a.desc}</small></div>`; }).join('')}</div></div>`;
+  });
+  if (players.length === 1) {
+    const p = players[0], list = p.decisions.filter(d => snapshots[d.age]).slice().reverse();
+    html += `<div class="panel"><h3 class="eyebrow">Rewind — live it differently</h3><p class="muted" style="margin:0 0 10px">Go back to any decision. The luck stays exactly the same; only your choices from that point change. Your earlier life stays on the chart.</p>
+      <div class="rewind">${list.map(d => `<button class="ghost" data-age="${d.age}"><b>${d.age}</b> ${d.label}<small>${(CARDS.find(c => c.id === d.id) || { title: d.id }).title.replace(/\{.*?\}/g, '').replace(/^\s*$/, d.id)}</small></button>`).join('')}</div></div>`;
+  }
+  html += `<div class="panel chartwrap"><div class="legend">${players.map((p, i) => `<span><i style="background:${COLORS[i]}"></i>${p.name}</span>`).join('')}<span><i style="background:var(--ghostc)"></i>Ghost</span>${prevLife ? '<span><i style="background:var(--teal)"></i>Earlier life</span>' : ''}</div><div class="chartbox"><svg id="chartEndSvg" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="ylab"></div><div class="endlab"></div></div><div class="xticks"></div></div>
+    <div class="row"><button class="primary" id="btnAgain">Live again (new luck)</button><button class="ghost" id="btnReplay">Replay with the same luck</button><button class="ghost" id="btnMenu">Change who you are</button>
+      <span class="muted" style="margin-left:auto">Luck seed <b style="color:var(--text)">${seed}</b> — enter it on the start screen to give someone your exact luck.</span></div>`;
+  $('end').innerHTML = html;
+  players.forEach((p, i) => {
+    $('copy' + i).onclick = e => navigator.clipboard.writeText(p.storyText).then(() => e.target.textContent = 'Copied!');
+    $('card' + i).onclick = () => downloadCard(p, evs[i]);
+  });
+  $('btnAgain').onclick = () => startGame(false); $('btnAgainTop').onclick = () => startGame(false);
+  $('end').querySelectorAll('.rewind button').forEach(b => b.onclick = () => rewindTo(+b.dataset.age));
+  $('btnReplay').onclick = () => startGame(true);
+  $('btnMenu').onclick = () => { $('end').classList.add('hidden'); $('start').classList.remove('hidden'); window.scrollTo(0, 0); };
+  $('game').classList.add('hidden'); $('end').classList.remove('hidden');
+  drawChart($('chartEndSvg'));
+  window.scrollTo(0, 0);
+}
+
+// ---------- wiring ----------
+if (typeof document !== 'undefined' && document.getElementById('personas')) {
+$('personas').innerHTML = Object.entries(PERSONAS).map(([id, P]) => `<button data-p="${id}" class="${id === personaId ? 'on' : ''}"><b>${P.name} <span class="muted" style="font-family:var(--body);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase">· ${P.diff}</span></b><small>${P.desc()}</small></button>`).join('');
+function refreshPersonas() { $('personas').querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.p === personaId); b.querySelector('small').textContent = PERSONAS[b.dataset.p].desc(); }); }
+$('personas').onclick = e => { const b = e.target.closest('button'); if (b) { personaId = b.dataset.p; refreshPersonas(); if (PERSONAS[personaId].startAge) setStartAge(PERSONAS[personaId].startAge); } };
+$('curSeg').querySelectorAll('button').forEach(b => b.onclick = () => { symbol = b.dataset.c; $('curSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); refreshPersonas(); });
+$('modeSeg').querySelectorAll('button').forEach(b => b.onclick = () => { mode = +b.dataset.m; $('modeSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+function setStartAge(a) { startAgeSel = a; $('ageSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.a === a)); }
+$('ageSeg').querySelectorAll('button').forEach(b => b.onclick = () => setStartAge(+b.dataset.a));
+$('btnStart').onclick = () => { clearSave(); startGame(false); };
+$('btnResume').onclick = resumeGame;
+$('btnNext').onclick = nextYear;
+$('btnSkip').onclick = skipToDecision;
+$('hintsClose').onclick = () => { try { localStorage.setItem('moneylife.hints', '1'); } catch (e) {} $('hints').classList.add('hidden'); };
+$('lifeSeg').querySelectorAll('button').forEach(b => b.onclick = () => { cur().s.lifestyle = b.dataset.l; render(); });
+$('investPct').oninput = e => { cur().s.investPct = +e.target.value; render(); };
+$('equityPct').oninput = e => { const s = cur().s; s.equityPct = +e.target.value; s.goldPct = Math.min(s.goldPct, 100 - s.equityPct); render(); };
+$('goldPct').oninput = e => { const s = cur().s; s.goldPct = Math.min(+e.target.value, 100 - s.equityPct); render(); };
+$('payDebt').onchange = e => { cur().s.payDebt = e.target.checked; render(); };
+$('c80').onchange = e => { cur().s.c80 = e.target.checked; render(); };
+$('nps').onchange = e => { cur().s.npsOn = e.target.checked; render(); };
+$('selfCare').onchange = e => { cur().s.selfCare = e.target.checked; render(); };
+document.addEventListener('keydown', e => {
+  if ($('game').classList.contains('hidden') || e.target.tagName === 'INPUT' || skipping) return;
+  if (e.key === 'Enter' && !$('btnNext').disabled) { e.preventDefault(); nextYear(); }
+  else if ((e.key === 's' || e.key === 'S') && !$('btnSkip').disabled) skipToDecision();
+  else if (/^[1-4]$/.test(e.key)) { const b = $('cardOpts').querySelectorAll('button')[+e.key - 1]; if (b && !b.disabled) b.click(); }
+});
+$('dreamChips').innerHTML = Object.entries(DREAMS).map(([id, d]) => `<button data-d="${id}" class="${chosenDreams.includes(id) ? 'on' : ''}">${d.name}</button>`).join('');
+function refreshChips() { $('dreamChips').querySelectorAll('button').forEach(b => { const on = chosenDreams.includes(b.dataset.d); b.classList.toggle('on', on); b.disabled = !on && chosenDreams.length >= 3; }); }
+$('dreamChips').onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; const id = b.dataset.d; chosenDreams = chosenDreams.includes(id) ? chosenDreams.filter(x => x !== id) : [...chosenDreams, id]; refreshChips(); };
+$('callSeg').querySelectorAll('button').forEach(b => b.onclick = () => { myCall = b.dataset.c; $('callSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+function refreshYou() {
+  const on = personaId === 'you'; $('youForm').classList.toggle('hidden', !on); $('ageSeg').classList.toggle('hidden', on); $('ageHead').classList.toggle('hidden', on); $('ageHint').classList.toggle('hidden', on);
+  if (on) { readYouForm(); const Y = PERSONAS.you; $('ySum').textContent = `Starts at ${Y.startAge} on ${money(Y.salary)}/yr gross, ${money(Y.cash)} saved${Y.loan ? ', ' + money(Y.loan) + ' owed' : ''}${Y.married ? ', married' : ''}${Y.kidsAges ? ', ' + Y.kidsAges.length + (Y.kidsAges.length > 1 ? ' kids' : ' kid') : ''}. Everything else — costs, cards, luck — scales to you.`; }
+}
+['yAge', 'ySal', 'ySav', 'yLoan', 'yMar', 'yKids'].forEach(id => $(id).oninput = refreshYou);
+const _personaClick = $('personas').onclick; $('personas').onclick = e => { _personaClick(e); refreshYou(); };
+refreshResume();
+}
+</script>
+</body>
+</html>
