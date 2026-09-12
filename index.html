@@ -967,12 +967,16 @@ const HIKE_CARD = {
 
 // Dynamic cards: crash, each kid's college, each kid's wedding.
 const CRASH_CARD = {
-  id: 'crash', title: 'Markets fell {r}', text: 'Your funds are worth {v}. Headlines say worse is coming.',
-  vars: s => ({ r: pct(-s.lastRet), v: money(s.equity + s.gold + s.fd) }),
+  id: 'crash', title: 'Markets fell {r}', text: 'Your funds are worth {v}. Headlines say worse is coming.{ctx}',
+  vars: s => ({ r: pct(-s.lastRet), v: money(s.equity + s.gold + s.fd),
+    ctx: s.retired ? ' You are drawing from this corpus — cash covers ' + (s.cash / Math.max(1, retiredCosts(s))).toFixed(1) + ' years of costs.' : '',
+    sell: s.retired ? 'Everything to the savings account. No more market risk, no more growth.' : 'To cash; investing stops until you turn it back on',
+    hold: s.retired ? 'Keep the withdrawal plan. Draw from cash and FDs first; equity gets time to recover.' : 'Keep the SIP running',
+    dip: s.retired ? 'Half your cash into equity. Bold when you are living off it.' : 'Half your cash into equity' }),
   opts: [
-    { label: 'Sell everything', sub: 'To cash; investing stops until you turn it back on', apply: s => { const all = s.equity + s.gold + s.fd; sellInv(s, all); s.cash += all - (s.equity + s.gold + s.fd); s.equity = s.gold = s.fd = 0; s.investPct = 0; return 'Panic-sold everything after the crash.'; } },
-    { label: 'Hold', sub: 'Keep the SIP running', apply: s => { s.crashesHeld++; return 'Held through the crash.'; } },
-    { label: 'Buy the dip', sub: 'Half your cash into equity', apply: s => { const a = s.cash * 0.5; s.cash -= a; s.equity += a; s.basis += a; s.crashesHeld++; return 'Bought the dip with ' + money(a) + '.'; } },
+    { label: 'Sell everything', sub: '{sell}', apply: s => { const all = s.equity + s.gold + s.fd; sellInv(s, all); s.cash += all - (s.equity + s.gold + s.fd); s.equity = s.gold = s.fd = 0; s.investPct = 0; return 'Panic-sold everything after the crash.'; } },
+    { label: 'Hold', sub: '{hold}', apply: s => { s.crashesHeld++; return 'Held through the crash.'; } },
+    { label: 'Buy the dip', sub: '{dip}', apply: s => { const a = s.cash * 0.5; s.cash -= a; s.equity += a; s.basis += a; s.crashesHeld++; return 'Bought the dip with ' + money(a) + '.'; } },
   ], ghost: 1,
 };
 const COLLEGE_CARD = {
@@ -1440,7 +1444,8 @@ function nextYear() {
     const c = p.pendingCard, vars = c.vars ? c.vars(s) : {};
     p.decisions.push({ age: s.age, key: c.key, id: c.id, opt: p.pickedOpt, label: fill(c.opts[p.pickedOpt].label, vars) });
     const m = applyCard(s, c, p.pickedOpt, d); if (m) p.log.push({ age: s.age, t: m, k: 'choice' });
-    p.lastWhy = WHY[c.id] ? { title: fill(c.title, vars), why: WHY[c.id], pick: fill(c.opts[p.pickedOpt].label, vars) } : null;
+    const why = c.id === 'crash' && s.retired ? 'In retirement a crash hurts because you are selling into it. The defence is a cash buffer of two to three years of costs, so equity is never sold at the bottom — hold, and draw from cash.' : WHY[c.id];
+    p.lastWhy = why ? { title: fill(c.title, vars), why, pick: fill(c.opts[p.pickedOpt].label, vars) } : null;
   } else { p.lastWhy = null;
   }
   p.lastMsgs = simulateYear(s, d); p.ledgerVer = (p.ledgerVer || 0) + 1;
