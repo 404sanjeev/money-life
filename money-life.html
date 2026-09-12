@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Money Life</title>
+<meta name="description" content="A financial-planning life simulator for India. One click, one year — from your first salary to 85. Does your money outlive you?">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Money Life — will your money outlive you?">
+<meta property="og:description" content="Live one year per turn from your first salary to 85. Marriage, a flat, kids, layoffs, crashes, scams that pay at first. A ghost plays the textbook plan with your exact luck.">
+<meta property="og:url" content="https://404sanjeev.github.io/money-life/">
+<meta property="og:image" content="https://404sanjeev.github.io/money-life/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1120">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%230d1120%22/%3E%3Ctext x=%2232%22 y=%2246%22 font-family=%22Georgia,serif%22 font-size=%2240%22 font-weight=%22700%22 fill=%22%23f4c95d%22 text-anchor=%22middle%22%3E%E2%82%B9%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap">
 <style>
@@ -70,6 +81,8 @@
   .personas button.on .diff { color: var(--gold); }
   .personas small { color: var(--muted); display: block; line-height: 1.4; font-size: 12.5px; }
   .startrow { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .more { margin-top: 18px; } .more summary { cursor: pointer; color: var(--muted); font-size: 13.5px; list-style: none; } .more summary::before { content: '▸ '; color: var(--gold); } .more[open] summary::before { content: '▾ '; }
+  .more input { background: var(--panel2); color: var(--text); border: 1px solid var(--line2); border-radius: 12px; padding: 9px 12px; font: inherit; }
   .startrow input { background: var(--panel2); color: var(--text); border: 1px solid var(--line2); border-radius: 12px; padding: 9px 12px; width: 170px; font: inherit; }
   .startrow input::placeholder { color: var(--faint); }
   #btnResume { border-color: var(--gold); color: var(--gold); }
@@ -151,6 +164,10 @@
   .toggle input { accent-color: var(--gold); width: 17px; height: 17px; flex-shrink: 0; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
 
+  .habits-sum { display: flex; align-items: center; gap: 12px; width: 100%; background: transparent; border: 0; color: var(--text); padding: 0; text-align: left; font-size: 13.5px; }
+  .habits-sum #habitsText { flex: 1; color: var(--muted); }
+  .habits-sum .chev { color: var(--gold); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+  .controls .grid { margin-top: 14px; }
   .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .actions .note { color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
   .actions .btns { display: flex; gap: 8px; }
@@ -164,6 +181,8 @@
   .chartbox svg { width: 100%; height: 230px; display: block; }
   .chartbox .ylab { position: absolute; left: 8px; top: 6px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .chartbox .endlab { position: absolute; transform: translate(-100%, -130%); background: var(--gold); color: var(--gold-ink); font-weight: 700; font-size: 12px; padding: 2px 7px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; pointer-events: none; }
+  .chartbox .tip { position: absolute; top: 8px; transform: translateX(-50%); background: var(--panel3); border: 1px solid var(--line2); border-radius: 8px; padding: 5px 9px; font-size: 12px; pointer-events: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .chartbox .tip b { display: block; color: var(--gold); font-size: 11px; } .chartbox .tip span { display: block; color: var(--muted); }
   .xticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); margin-top: 4px; font-variant-numeric: tabular-nums; }
   .log { grid-column: 1 / -1; max-height: 220px; overflow: auto; font-size: 13px; }
   .log div { padding: 5px 0; border-bottom: 1px dashed var(--line); color: var(--muted); }
@@ -228,6 +247,13 @@
   @keyframes toastin { from { opacity: 0; transform: translateX(20px); } } @keyframes toastout { to { opacity: 0; transform: translateY(-6px); } }
   /* end screen */
   .sharerow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); padding-bottom: 0; position: sticky; top: 0; background: var(--bg); z-index: 3; }
+  .tabs button { background: transparent; border: 0; color: var(--muted); padding: 12px 16px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button.on { color: var(--gold); border-bottom-color: var(--gold); }
+  .tabpane { display: flex; flex-direction: column; gap: 16px; }
+  .numgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .endrow { padding-top: 8px; border-top: 1px solid var(--line); }
+  @media (max-width: 800px) { .numgrid { grid-template-columns: 1fr; } }
   .badge .new { float: right; font: 700 9px/1 var(--body); letter-spacing: .1em; color: var(--gold-ink); background: var(--gold); border-radius: 999px; padding: 3px 6px; }
   .story p:first-of-type::first-letter { font-family: var(--display); font-size: 3.1em; font-weight: 700; float: left; line-height: .85; margin: 4px 8px 0 0; color: var(--gold); }
   .diff div { padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 14px; } .diff div:last-child { border-bottom: 0; }
@@ -325,6 +351,7 @@
     <div class="chips" id="dreamChips"></div>
     <h3>Your call</h3>
     <div class="seg" id="callSeg"><button data-c="beat" class="on">I'll beat the ghost</button><button data-c="lose">The ghost will beat me</button></div>
+    <details class="more"><summary>More options — start age, two players, luck seed</summary>
     <h3 id="ageHead">Start at what age?</h3>
     <div class="seg" id="ageSeg">
       <button data-a="22" class="on">22</button><button data-a="25">25</button><button data-a="30">30</button><button data-a="35">35</button><button data-a="40">40</button>
@@ -335,9 +362,11 @@
       <button data-m="1" class="on">Solo</button>
       <button data-m="2">Two players, same luck (take turns)</button>
     </div>
+    <h3>Luck seed</h3>
+    <input id="seedIn" placeholder="Optional — same seed, same luck for everyone" style="width:100%;max-width:360px">
+    </details>
     <div class="row startrow">
       <input id="nameIn" placeholder="Your name" style="width:150px">
-      <input id="seedIn" placeholder="Luck seed (optional)" title="Everyone who enters the same seed gets the same luck — for classrooms and rematches">
       <span style="margin-left:auto" class="row">
         <button class="ghost hidden" id="btnResume">Continue</button>
         <button class="primary" id="btnStart">Start my life →</button>
@@ -400,12 +429,6 @@
       <div class="row"><button class="ghost" id="hintsClose">Got it</button></div>
     </div>
 
-    <div class="panel ledger" id="summary">
-      <h3 class="eyebrow" id="summaryTitle">Last year</h3>
-      <ul id="summaryList"></ul>
-      <div class="why hidden" id="why"><span class="eyebrow">Planner's note</span><div id="whyText"></div></div>
-    </div>
-
     <div class="panel card hidden" id="card">
       <h3 class="eyebrow" id="cardEyebrow">Decision</h3>
       <div class="title" id="cardTitle"></div>
@@ -413,9 +436,15 @@
       <div class="opts" id="cardOpts"></div>
     </div>
 
+    <div class="panel ledger" id="summary">
+      <h3 class="eyebrow" id="summaryTitle">Last year</h3>
+      <ul id="summaryList"></ul>
+      <div class="why hidden" id="why"><span class="eyebrow">Planner's note</span><div id="whyText"></div></div>
+    </div>
+
     <div class="panel controls">
-      <h3 class="eyebrow">Your habits this year</h3>
-      <div class="grid">
+      <button class="habits-sum" id="habitsSum"><span class="eyebrow" style="margin:0">Your habits</span><span id="habitsText"></span><span class="chev" id="habitsChev">Change ▾</span></button>
+      <div class="grid" id="habitsGrid">
         <div class="ctl">
           <label>Lifestyle — <b id="lifeLabel"></b></label>
           <div class="seg lifestyle" id="lifeSeg">
@@ -464,7 +493,7 @@
       <span><i style="background:var(--gold)"></i>You</span>
       <span><i style="background:var(--ghostc)"></i>Ghost (textbook plan, same luck)</span>
     </div>
-    <div class="chartbox"><svg id="chart" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="ylab"></div><div class="endlab"></div></div>
+    <div class="chartbox"><svg id="chart" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="ylab"></div><div class="endlab"></div><div class="tip hidden"></div></div>
     <div class="xticks"></div>
   </div>
 
@@ -494,19 +523,19 @@ const LIFE = {                                 // cost multiplier, yearly happin
 // Starting lives. Money in internal units (₹ = ×12). desc() re-renders in the chosen currency.
 const PERSONAS = {
   grad:   { name: 'Fresh graduate', diff: 'Normal', salary: 50000, loan: 25000, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035,
-            desc: () => `${money(50000)} job in a metro, ${money(25000)} education loan. The default life.` },
+            desc: () => `${money(50000)} salary · ${money(25000)} loan · metro · the default life` },
   tier2:  { name: 'Tier-2 hustler', diff: 'Hard', salary: 20000, loan: 0, cash: 1000, cityMult: 0.7, scale: 0.5, layoff: 0.05, growth: 0.04,
-            desc: () => `No degree, ${money(20000)} job in a small city. Cheaper life, slower ladder, no loan.` },
+            desc: () => `${money(20000)} salary · no loan · small city · no degree, slower ladder` },
   topper: { name: 'IIT / IIM topper', diff: 'Easy money, hard life', salary: 150000, loan: 165000, cash: 5000, cityMult: 1.3, scale: 1.6, layoff: 0.07, growth: 0.03,
-            desc: () => `${money(150000)} starting salary, ${money(165000)} education loan, Bangalore prices, tech layoffs, expensive tastes arrive free.` },
+            desc: () => `${money(150000)} salary · ${money(165000)} loan · Bangalore · tech layoffs, expensive tastes` },
   govt:   { name: 'Government officer', diff: 'Easy', salary: 35000, loan: 10000, cash: 2000, cityMult: 0.9, scale: 0.85, layoff: 0, growth: 0.03, pension: true,
-            desc: () => `${money(35000)}, can never be laid off, a pension at 60 instead of EPF. Slow and steady.` },
+            desc: () => `${money(35000)} salary · ${money(10000)} loan · state capital · no layoffs, pension at 60` },
   heir:   { name: 'Family business heir', diff: 'Normal', salary: 30000, loan: 0, cash: 400000, cityMult: 1.0, scale: 1.0, layoff: 0.07, growth: 0.025, heir: true,
-            desc: () => `${money(400000)} in the bank at 22 and ${money(30000)}/yr from the shop. Bad years happen. Growth is up to you.` },
+            desc: () => `${money(30000)} from the shop · no loan · ${money(400000)} in the bank · bad years happen` },
   you:    { name: 'Yourself', diff: 'Your numbers', custom: true, salary: 50000, loan: 0, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035,
-            desc: () => 'Your real age, salary, savings, loans and family. Skin in the game.' },
+            desc: () => 'your salary · your loans · your savings · your family' },
   parent: { name: 'Single parent', diff: 'Hard', salary: 70000, loan: 0, cash: 10000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035, startAge: 30, kids: [28], insured: true,
-            desc: () => `Start at 30 with a two-year-old, ${money(70000)} salary, no partner, no savings to speak of.` },
+            desc: () => `${money(70000)} salary · no loan · metro · starts at 30 with a two-year-old, no partner` },
 };
 const RATES = { student: 0.06, card: 0.24, car: 0.09, school: 0.07, mortgage: 0.06, rental: 0.085, kidloan: 0.09, personal: 0.14 };
 const LTCG = 0.125;                            // long-term capital gains tax on equity and gold
@@ -530,8 +559,9 @@ function money(n, dec) {
   const c = CUR[symbol]; let v = n * c.mult; const neg = v < 0; v = Math.abs(v);
   let s;
   if (c.ind) {
-    if (v >= 9.9995e6) s = (v / 1e7).toFixed(dec ?? 2) + ' Cr';
-    else if (v >= 1e5) s = (v / 1e5).toFixed(dec ?? 1) + ' L';
+    const trim = x => x.replace(/\.0+$|(\.\d*?)0+$/, '$1');
+    if (v >= 9.9995e6) s = trim((v / 1e7).toFixed(dec ?? 2)) + ' Cr';
+    else if (v >= 1e5) s = trim((v / 1e5).toFixed(dec ?? 1)) + ' L';
     else s = Math.round(v).toLocaleString('en-IN');
   } else {
     if (v >= 1e6) s = (v / 1e6).toFixed(dec ?? 2) + 'M';
@@ -1031,7 +1061,9 @@ function simulateYear(s, d) {
   s.taxPaid += tax; s.taxSaved += saved;
   s.ppf += c80; s.nps += nps;
   const takehome = own + spouse + s.sideIncome + rentalIncome - epfEmp - tax - c80 - nps;
-  msgs.push({ t: 'Income tax: ' + money(tax) + (c80 + nps > 0 ? ' (put ' + money(c80 + nps) + ' in ' + (nps > 0 ? 'PPF + NPS' : 'PPF') + ', saved ' + money(saved) + ' tax)' : '') + (epfEmp > 0 ? '. EPF: +' + money(epfEmp * 2) : '') + '.', k: '' });
+  msgs.push({ t: 'Paid ' + money(tax) + ' income tax.', k: '' });
+  if (c80 + nps > 0) msgs.push({ t: 'Put ' + money(c80 + nps) + ' into ' + (nps > 0 ? 'PPF + NPS' : 'PPF') + ', saving ' + money(saved) + ' tax.', k: 'pos' });
+  if (epfEmp > 0) msgs.push({ t: 'EPF grew ' + money(epfEmp * 2) + '.', k: '' });
 
   // --- surplus ---
   let surplus = takehome - costs - hit - mins;
@@ -1055,8 +1087,8 @@ function simulateYear(s, d) {
     const inv = surplus * s.investPct / 100;
     s.equity += inv * s.equityPct / 100; s.gold += inv * s.goldPct / 100; s.fd += inv * (100 - s.equityPct - s.goldPct) / 100; s.basis += inv * (s.equityPct + s.goldPct) / 100;
     s.cash += surplus - inv;
-    if (inv > 0) msgs.push({ t: 'Invested ' + money(inv) + ', kept ' + money(surplus - inv) + ' in savings.', k: 'pos' });
-    else if (surplus > 0) msgs.push({ t: 'Kept ' + money(surplus) + ' in savings.', k: '' });
+    if (inv > 0) msgs.push({ t: 'Invested ' + money(inv) + '.', k: 'pos' });
+    if (surplus - inv > 100) msgs.push({ t: 'Kept ' + money(surplus - inv) + ' in savings.', k: '' });
   }
 
   if (s.ltcgYear > 100) { msgs.push({ t: 'Capital gains tax on what you sold: ' + money(s.ltcgYear) + '.', k: 'warn' }); } s.ltcgYear = 0;
@@ -1070,7 +1102,7 @@ function simulateYear(s, d) {
   s.lastRet = d.ret;
   if (d.ret <= -0.2) msgs.push({ t: 'Market crash: equity ' + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: 'neg' });
   else if (d.ret >= 0.25) msgs.push({ t: 'Bull market: equity +' + pct(d.ret) + '.', k: 'pos' });
-  else if (tot > 0) msgs.push({ t: 'Markets: equity ' + (d.ret >= 0 ? '+' : '') + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: '' });
+  else if (tot > 0) msgs.push({ t: 'Equity ' + (d.ret >= 0 ? '+' : '') + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: '' });
 
   // --- bankruptcy: the card has swallowed a year's household income ---
   if (s.debts.card > household(s)) {
@@ -1161,7 +1193,7 @@ function retiredYear(s, d) {
   for (const k in minOf) { s.debts[k] -= minOf[k]; mins += minOf[k]; }
   // drawdown
   const need = costs + hit + mins + tax - income;
-  if (need <= 0) { s.cash += -need; msgs.push({ t: 'Income ' + money(income) + ' covered costs of ' + money(costs + hit) + ' with ' + money(-need) + ' to spare.', k: 'pos' }); }
+  if (need <= 0) { s.cash += -need; msgs.push({ t: 'Income of ' + money(income) + ' covered the year, with ' + money(-need) + ' to spare.', k: 'pos' }); }
   else {
     let left = need, drawn = 0;
     { const x = Math.min(left, s.cash); s.cash -= x; left -= x; drawn += x; } if (left > 0) { const before = left; left = sellInv(s, left); drawn += before - left; }
@@ -1171,7 +1203,7 @@ function retiredYear(s, d) {
       if (!s.brokeAt) { s.brokeAt = s.age; s.happy -= 15; for (const k of ['card', 'kidloan', 'car', 'school', 'student']) s.debts[k] = 0; msgs.push({ t: 'THE MONEY RAN OUT at ' + s.age + '. ' + (s.kids.length ? 'Your children are covering your costs now.' : 'You are living on relatives\' charity.'), k: 'neg' }); }
       else { s.happy -= 1.5; msgs.push({ t: 'Still dependent on ' + (s.kids.length ? 'your children' : 'relatives') + ' for ' + money(left) + '.', k: 'neg' }); }
       s.lifestyle = 'frugal';
-    } else msgs.push({ t: 'Drew ' + money(drawn) + ' from the corpus' + (income > 0 ? ' on top of ' + money(income) + ' of income' : '') + '. ' + money(liquid(s)) + ' left.', k: liquid(s) < costs * 5 ? 'warn' : '' });
+    } else { msgs.push({ t: 'Drew ' + money(drawn) + ' from the corpus' + (income > 0 ? ' on top of ' + money(income) + ' of income' : '') + '.', k: '' }); msgs.push({ t: 'Corpus left: ' + money(liquid(s)) + ' — about ' + (liquid(s) / Math.max(1, costs - income)).toFixed(0) + ' years at this spend.', k: liquid(s) < costs * 5 ? 'warn' : '' }); }
   }
   // markets
   const ret = d.ret - s.feeDrag;
@@ -1181,7 +1213,7 @@ function retiredYear(s, d) {
   s.lastRet = d.ret;
   if (s.ltcgYear > 100) msgs.push({ t: 'Capital gains tax on the withdrawal: ' + money(s.ltcgYear) + '.', k: 'warn' }); s.ltcgYear = 0;
   if (d.ret <= -0.2) msgs.push({ t: 'Market crash: equity ' + pct(d.ret) + '. In retirement, this is when sequence risk bites.', k: 'neg' });
-  else if (tot > 0) msgs.push({ t: 'Markets: equity ' + (d.ret >= 0 ? '+' : '') + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: '' });
+  else if (tot > 0) msgs.push({ t: 'Equity ' + (d.ret >= 0 ? '+' : '') + pct(d.ret) + ', gold ' + (d.gold >= 0 ? '+' : '') + pct(d.gold) + '.', k: '' });
   // happiness & time
   const nwBefore = s.history[s.history.length - 1];
   s.cost *= 1 + INFL;
@@ -1280,7 +1312,7 @@ function rewindTo(age) {
   beginTurn();
 }
 function startGame(sameSeed) {
-  snapshots = {}; prevLife = null;
+  snapshots = {}; prevLife = null; habitsOpen = true; habitsSeen = false;
   playerName = ($('nameIn').value || '').trim().slice(0, 24);
   if (personaId === 'you') readYouForm();
   const typed = ($('seedIn').value || '').trim();
@@ -1310,7 +1342,7 @@ function tickMoney(el, value) {
   const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = money(from + (to - from) * e); if (k < 1) el._raf = requestAnimationFrame(step); };
   el._raf = requestAnimationFrame(step);
 }
-let lastCardKey = null, skipping = false;
+let lastCardKey = null, skipping = false, habitsOpen = true, habitsSeen = false;
 
 function render() {
   const p = cur(), s = p.s, P = PERSONAS[personaId];
@@ -1375,6 +1407,8 @@ function render() {
   $('alEq').style.width = s.equityPct + '%'; $('alGd').style.width = s.goldPct + '%'; $('alFd').style.width = (100 - s.equityPct - s.goldPct) + '%';
   $('eqLabel').textContent = s.equityPct + '%'; $('goldLabel').textContent = s.goldPct + '%'; $('fdLabel').textContent = (100 - s.equityPct - s.goldPct) + '%';
   $('selfCare').checked = s.selfCare; $('careLabel').textContent = money(1500 * s.cost * s.scale);
+  $('habitsText').textContent = `${LIFE[s.lifestyle].label} · invest ${s.investPct}% · equity ${s.equityPct} / gold ${s.goldPct} / FD ${100 - s.equityPct - s.goldPct} · 80C ${s.c80 ? '✓' : '–'} · NPS ${s.npsOn ? '✓' : '–'} · self-care ${s.selfCare ? '✓' : '–'}`;
+  $('habitsGrid').classList.toggle('hidden', !habitsOpen); $('habitsChev').textContent = habitsOpen ? 'Done ▴' : 'Change ▾';
   $('payDebt').checked = s.payDebt; $('c80').checked = s.c80; $('c80Label').textContent = money(C80_MAX); $('nps').checked = s.npsOn; $('npsLabel').textContent = money(NPS_MAX);
 
   const need = p.pendingCard && p.pickedOpt === null;
@@ -1414,6 +1448,7 @@ function nextYear() {
   if (players.every(q => q.s.age >= END_AGE || q.s.dead)) { clearSave(); return endGame(); }
   if (players.length > 1) { cp = 1 - cp; if (cur().s.age >= END_AGE || cur().s.dead) cp = 1 - cp; }
   saveGame();
+  if (!habitsSeen) { habitsSeen = true; habitsOpen = false; }
   beginTurn();
   if (!skipping && window.innerWidth < 820) $('summary').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -1421,15 +1456,15 @@ function nextYear() {
 // auto-advance quiet years until someone has a decision to make
 async function skipToDecision() {
   if ($('btnSkip').disabled) return;
-  skipping = true;
+  skipping = true; const orig = $('btnSkip').innerHTML;
   for (let i = 0; i < 70; i++) {
     nextYear();
     if ($('game').classList.contains('hidden') || cur().pendingCard) break;
     if (cur().s.dead) break;
-    render();
+    render(); $('btnSkip').textContent = 'Skipping… ' + cur().s.age;
     await new Promise(r => setTimeout(r, 110));
   }
-  skipping = false;
+  skipping = false; $('btnSkip').innerHTML = orig;
   if (!$('game').classList.contains('hidden')) render();
 }
 
@@ -1485,6 +1520,18 @@ function drawChart(svg) {
   if (el && endPt) { el.textContent = money(endPt[3]); el.style.left = (endPt[0] / W * 100) + '%'; el.style.top = (endPt[1] / H * 100) + '%'; el.style.display = ''; } else if (el) el.style.display = 'none';
   const xt = box.nextElementSibling;
   if (xt && xt.classList.contains('xticks')) { const t = []; for (let a = START_AGE; a <= END_AGE; a += 9) t.push(`<span>${a}</span>`); xt.innerHTML = t.join(''); }
+  const tip = box.querySelector('.tip');
+  if (tip && !box._hover) {
+    box._hover = true;
+    box.addEventListener('mousemove', e => {
+      const r = box.getBoundingClientRect(), i = Math.max(0, Math.min(n - 1, Math.round((e.clientX - r.left - P / W * r.width) / ((W - 2 * P) / W * r.width) * (n - 1))));
+      const you = players[0] && players[0].s.history[i], gh = G.history[i];
+      if (you === null || you === undefined) { tip.classList.add('hidden'); return; }
+      tip.classList.remove('hidden'); tip.style.left = (x(i) / W * 100) + '%';
+      tip.innerHTML = `<b>Age ${START_AGE + i}</b>${money(you)}${gh !== null && gh !== undefined ? '<span>ghost ' + money(gh) + '</span>' : ''}`;
+    });
+    box.addEventListener('mouseleave', () => tip.classList.add('hidden'));
+  }
 }
 
 // ---------- evaluation ----------
@@ -1563,58 +1610,60 @@ function lessonsFor(p, ev) {
   else if (s.health < 45) bad(`Health ${Math.round(s.health)}/100 at the end. It raised every hospital bill and every premium for twenty years — the quietest tax you paid.`);
   if (s.retiredAt && s.retiredAt < RETIRE_AGE) good(`You retired at ${s.retiredAt}. ${s.brokeAt ? 'The corpus did not stretch — early retirement needs 130%+ freedom, not 100%.' : 'The money held. That is what the freedom meter was for.'}`);
   if (s.retired && s.equityPct >= 70) bad('You kept 70%+ in equity through retirement. When you are withdrawing, a crash can\'t be waited out — some of it has to be sold at the bottom.');
-  return les.join('');
+  return les;
 }
 
 // ---------- the story of your life ----------
 const STORY = {
-  insure: ['took health cover early', 'skipped health insurance'],
-  car: ['bought a new car on loan', 'paid cash for a new car', 'drove a used car', 'stuck to the metro'],
-  crypto: ['went all in on a friend\'s coin', 'passed on the crypto tip'],
-  marry: ['married with a simple wedding', 'married with a big fat wedding', 'said not yet to marriage'],
-  job: ['jumped to a startup', 'stayed in the stable job'],
-  term: ['bought term cover', 'skipped term insurance'],
-  house: ['bought a flat', 'kept renting'],
-  kid: ['had a child', 'said not now to a child'],
-  mba: ['did an MBA on loan', 'skipped the MBA'],
-  vacation: ['took the trip of a lifetime', 'skipped the big trip'],
-  rental: ['bought a rental flat', 'stuck to mutual funds'],
-  parents: ['started supporting your parents', 'left your parents to your siblings'],
-  side: ['launched a side business', 'kept the business idea a hobby'],
-  cosign: ['guaranteed a friend\'s loan', 'declined to be guarantor'],
-  adviser: ['moved your money to a 3%-fee adviser', 'turned down the smooth adviser'],
-  dreamcar: ['bought the dream car', 'skipped the dream car'],
-  downsize: ['downsized the family home', 'stayed in the family home'],
-  crash: ['panic-sold in a crash', 'held through a crash', 'bought the dip in a crash'],
-  college: ['paid for a child\'s college', 'took a loan for a child\'s college', 'let a child take their own loan'],
-  wedding: ['threw a grand wedding for a child', 'gave a child a modest wedding', 'let a child pay for their own wedding'],
-  hike: ['upgraded the lifestyle after a promotion', 'banked a raise', 'ignored a raise'],
-  glide: ['glided to 40% equity before retiring', 'went conservative before retiring', 'kept a full equity load into retirement'],
-  hop31: ['hopped jobs for a raise', 'stayed loyal'], hop47: ['hopped jobs one last time', 'stayed till retirement'],
-  chit: ['joined a chit fund', 'passed on the chit fund'], mlm: ['bought into a cousin\'s MLM', 'declined the MLM'], coop: ['chased a 15% FD', 'stuck to boring FDs'],
-  crunch: ['sold investments to survive a layoff', 'took a personal loan to survive a layoff', 'borrowed from family during a layoff', 'cut to the bone during a layoff'],
-  retire: ['retired on a systematic withdrawal plan', 'bought an annuity', 'kept working part-time'],
-  early: ['retired early', 'went part-time to coast', 'kept working despite being free'],
-  kidhouse: ['helped a child buy a flat', 'declined to fund a child\'s flat'],
-  move: ['moved somewhere cheaper', 'stayed put'],
+  insure: ['health cover', 'no health cover'],
+  car: ['a new car on loan', 'a new car paid in cash', 'a used car', 'the metro instead of a car'],
+  crypto: ['all-in on a friend\'s coin', 'a pass on the crypto tip'],
+  marry: ['a simple wedding', 'a big fat wedding', 'a not-yet to marriage'],
+  job: ['a jump to a startup', 'the stable job kept'],
+  term: ['term cover', 'no term cover'],
+  house: ['a flat of your own', 'renting by choice'],
+  kid: ['a child', 'a not-now to a child'],
+  mba: ['an MBA on loan', 'no MBA'],
+  vacation: ['the trip of a lifetime', 'the big trip skipped'],
+  rental: ['a rental flat', 'funds instead of a second flat'],
+  parents: ['a monthly cheque to your parents', 'your parents left to your siblings'],
+  side: ['a side business', 'the business idea kept as a hobby'],
+  cosign: ['a friend\'s loan guaranteed', 'a friend\'s loan declined'],
+  adviser: ['a 3%-fee adviser', 'the smooth adviser turned away'],
+  dreamcar: ['the dream car', 'the dream car skipped'],
+  downsize: ['a smaller home', 'the family home kept'],
+  crash: ['a panic-sell in a crash', 'nerves held through a crash', 'the dip bought in a crash'],
+  college: ['a child\'s college paid for', 'a loan for a child\'s college', 'a child\'s own education loan'],
+  wedding: ['a grand wedding for a child', 'a modest wedding for a child', 'a child\'s wedding paid by the child'],
+  hike: ['a lifestyle upgrade after a promotion', 'a raise banked', 'a raise ignored'],
+  glide: ['a glide to 40% equity', 'a conservative turn before retirement', 'a full equity load kept into retirement'],
+  hop31: ['a job hop for a raise', 'loyalty over a raise'], hop47: ['one last job hop', 'staying till retirement'],
+  chit: ['a chit fund joined', 'the chit fund passed'], mlm: ['a cousin\'s MLM kit', 'the MLM declined'], coop: ['a 15% FD chased', 'boring FDs kept'],
+  crunch: ['investments sold to survive a layoff', 'a personal loan through a layoff', 'money borrowed from family in a layoff', 'costs cut to the bone in a layoff'],
+  retire: ['retirement on a withdrawal plan', 'an annuity', 'part-time work into retirement'],
+  early: ['early retirement', 'coasting part-time', 'work kept up despite freedom'],
+  kidhouse: ['a child\'s down payment covered', 'a child\'s flat not funded'],
+  move: ['a move somewhere cheaper', 'staying put'],
 };
+// decisions that carry their age in the story
+const STORY_AGE = { marry: [0, 1], house: [0], kid: [0], retire: [0, 1, 2], early: [0, 1], college: [0, 1, 2], wedding: [0, 1, 2], rental: [0], crash: [0, 1, 2], kidhouse: [0], downsize: [0] };
 const EVENT_PHRASES = [[/MONEY RAN OUT/, 'the money running out'], [/Sold the house/, 'selling the house to survive'], [/serious illness/, 'a serious illness'], [/Laid off/, 'a layoff'], [/Hospital/, 'a hospital bill'], [/BANKRUPT/, 'bankruptcy'], [/crash/, 'a market crash'], [/spouse passed/, 'losing your spouse'], [/friend defaulted/, 'your friend\'s default'], [/Promoted/, 'a promotion'], [/relative left you/, 'an inheritance'], [/MBA done/, 'the MBA paying off'], [/side business works/, 'the side business taking off'], [/coin 4×/, 'the coin actually paying off']];
+const andList = a => a.length <= 1 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
 function storyFor(p, ev) {
-  const s = p.s, P = PERSONAS[personaId], you = players.length > 1 ? p.name : (playerName || 'You');
+  const s = p.s, P = PERSONAS[personaId], you = players.length > 1 ? p.name : (playerName || 'You'), solo = you === 'You';
   const sa = s.history.findIndex(v => v !== null) + START_AGE, st = newState(personaId, sa);
   const paras = [`${you} started at ${sa} as ${/^[aeiou]/i.test(P.name) ? 'an' : 'a'} ${P.name.toLowerCase()}: ${money(st.salary)} a year${st.debts.student > 0 ? ', ' + money(st.debts.student) + ' of education loan' : ''}${st.cash > 20000 ? ' and ' + money(st.cash) + ' already in the bank' : ''}.`];
   const decades = [[0, 29, 'twenties'], [30, 39, 'thirties'], [40, 49, 'forties'], [50, 59, 'fifties'], [60, 69, 'sixties'], [70, 79, 'seventies'], [80, 85, 'eighties']];
   for (const [a, b, name] of decades) {
     const decs = p.decisions.filter(d => d.age >= a && d.age <= b && STORY[d.id]).filter((d, i, arr) => !((d.id === 'marry' && d.opt === 2 || d.id === 'kid' && d.opt === 1) && arr.slice(i + 1).some(e => e.id === d.id && e.opt === d.opt)));
     let kidsSeen = p.decisions.filter(d => d.id === 'kid' && d.opt === 0 && d.age < a).length;
-    const dec = decs.map(d => `${d.id === 'kid' && d.opt === 0 ? (kidsSeen++ ? 'had a second child' : 'had a child') : STORY[d.id][d.opt]} at ${d.age}`);
+    const dec = decs.map(d => { const ph = d.id === 'kid' && d.opt === 0 ? (kidsSeen++ ? 'a second child' : 'a first child') : STORY[d.id][d.opt]; return (STORY_AGE[d.id] || []).includes(d.opt) ? `${ph} at ${d.age}` : ph; });
     const evs = []; const seen = new Set();
     p.log.filter(e => e.age >= a && e.age <= b && e.k !== 'choice').forEach(e => { for (const [re, ph] of EVENT_PHRASES) if (re.test(e.t) && !seen.has(ph)) { seen.add(ph); evs.push(`${ph} at ${e.age}`); } });
     if (!dec.length && !evs.length) continue;
-    const solo = you === 'You';
-    let t = `In ${solo ? 'your' : you + "'s"} ${name}, ${solo ? 'you' : 'they'}` + (dec.length ? ' ' + dec.join(', ') + '.' : ` mostly kept ${solo ? 'your' : 'their'} head down.`);
-    if (evs.length) t += ' Life served up ' + evs.join(', ') + '.';
-    paras.push(t);
+    let t = `${solo ? 'Your' : you + "'s"} ${name}: ` + (dec.length ? andList(dec) + '.' : 'a quiet stretch, head down.');
+    if (evs.length) t += ' Life served up ' + andList(evs) + '.';
+    paras.push(t.replace(/your parents/g, solo ? 'your parents' : 'their parents').replace(/a flat of your own/g, solo ? 'a flat of your own' : 'a flat of their own'));
   }
   paras.push(s.dead ? `At ${s.dead}: gone, with ${money(ev.nw)} left behind and ${Math.round(s.happy)}/100 on the happiness meter. ${ev.title}` : `At 85: ${money(ev.nw)} left behind, ${Math.round(s.happy)}/100 on the happiness meter. ${ev.title}`);
   return paras;
@@ -1672,75 +1721,86 @@ function downloadCard(p, ev) {
 // ---------- ending ----------
 function endGame() {
   const evs = players.map(evaluate);
-  let html = `<div class="sharerow"><button class="ghost" id="btnAgainTop">Live again</button><span class="muted" style="margin-left:auto">Seed <b class="num" style="color:var(--text)">${seed}</b></span></div>`;
+  const dreamPanel = (p, ev) => {
+    const dn = (p.dreams || []).filter(id => p.dreamState[id] === true).length, callRight = (p.call === 'beat') === (ev.nw >= ev.gnw);
+    return p.dreams && p.dreams.length ? `<div class="panel"><h3 class="eyebrow">${players.length > 1 ? p.name + "'s" : 'Your'} dreams · ${dn} of ${p.dreams.length}</h3><div class="dreamsum">${p.dreams.map(id => { const st = p.dreamState[id]; return `<div class="dream ${st === true ? 'done' : st === false ? 'lost' : 'open'}"><i>${st === true ? '✓' : st === false ? '✕' : ''}</i>${DREAMS[id].name}</div>`; }).join('')}</div>
+      <p class="muted" style="margin:10px 0 0">Your call at the start: <b style="color:var(--text)">${p.call === 'beat' ? "I'll beat the ghost" : 'The ghost will beat me'}</b>. ${callRight ? 'You were right.' : 'You were wrong — ' + (ev.nw >= ev.gnw ? 'you beat it.' : 'it beat you.')}</p></div>` : '';
+  };
+  const tabs = { result: '', story: '', lessons: '', rewind: '' };
+
+  // ---- result ----
+  tabs.result += `<div class="sharerow"><span class="muted">Seed <b class="num" style="color:var(--text)">${seed}</b> — same seed, same luck.</span></div>`;
   if (players.length > 1) {
     const [a, b] = players, [ea, eb] = evs;
     const row = (k, f) => `<tr><td>${k}</td><td style="color:${COLORS[0]}">${f(ea, a)}</td><td style="color:${COLORS[1]}">${f(eb, b)}</td><td class="muted">${f({ nw: netWorth(G), corpus: (G.at60 || {}).corpus || 0, ready: (G.at60 || {}).ready ?? null, letter: '', happy: G.happy }, { s: G })}</td></tr>`;
-    html += `<div class="panel"><h2 style="margin:0 0 10px">${ea.nw > eb.nw ? a.name : eb.nw > ea.nw ? b.name : 'Nobody'} wins on money${(ea.nw > eb.nw) === (a.s.happy > b.s.happy) ? ' — and on happiness' : ' — but ' + (a.s.happy > b.s.happy ? a.name : b.name) + ' wins on happiness'}.</h2>
+    tabs.result += `<div class="panel"><h2 style="margin:0 0 10px">${ea.nw > eb.nw ? a.name : eb.nw > ea.nw ? b.name : 'Nobody'} wins on money${(ea.nw > eb.nw) === (a.s.happy > b.s.happy) ? ' — and on happiness' : ' — but ' + (a.s.happy > b.s.happy ? a.name : b.name) + ' wins on happiness'}.</h2>
       <div style="overflow-x:auto"><table class="cmp"><tr><th></th><th style="color:${COLORS[0]}">${a.name}</th><th style="color:${COLORS[1]}">${b.name}</th><th class="muted">Ghost</th></tr>
       ${row('Grade', e => e.letter || '—')}${row('Net worth', e => money(e.nw))}${row('Retirement corpus', e => money(e.corpus))}${row('Readiness', e => e.ready === null ? '—' : pct(e.ready))}${row('Happiness', (e, p) => Math.round(p.s.happy))}${row('Bankruptcies', (e, p) => p.s.bankruptcies || 0)}</table></div></div>`;
-    // where the lives diverged
     const keys = [...new Set([...a.decisions, ...b.decisions].map(d => d.key))];
     const diffs = keys.map(k => { const da = a.decisions.find(d => d.key === k), db = b.decisions.find(d => d.key === k); if (!da || !db || da.opt === db.opt) return null; return `<div><b>Age ${da.age}</b> <span style="color:${COLORS[0]}">${da.label}</span> vs <span style="color:${COLORS[1]}">${db.label}</span></div>`; }).filter(Boolean);
     let swing = { i: -1, v: 0 }; const ha = a.s.history, hb = b.s.history;
     for (let i = 1; i < ha.length; i++) { if (ha[i] === null || hb[i] === null || ha[i - 1] === null) continue; const g = Math.abs((ha[i] - hb[i]) - (ha[i - 1] - hb[i - 1])); if (g > swing.v) swing = { i, v: g }; }
-    html += `<div class="panel diff"><h3 class="eyebrow">Where your lives diverged</h3>${diffs.length ? diffs.join('') : '<div class="muted">You made every decision the same way — the gap is pure habits.</div>'}
+    tabs.result += `<div class="panel diff"><h3 class="eyebrow">Where your lives diverged</h3>${diffs.length ? diffs.join('') : '<div class="muted">You made every decision the same way — the gap is pure habits.</div>'}
       ${swing.i > 0 ? `<p class="muted">The biggest single-year swing between you was at age ${START_AGE + swing.i - 1}: the gap moved by ${money(swing.v)}.</p>` : ''}</div>`;
   }
   if (players.length === 1 && prevLife) {
     const ev = evs[0], better = ev.nw > prevLife.nw;
-    html += `<div class="panel" style="border-color:var(--teal)"><h3 class="eyebrow" style="color:var(--teal)">Rewound at ${prevLife.age} — what changed</h3>
+    tabs.result += `<div class="panel" style="border-color:var(--teal)"><h3 class="eyebrow" style="color:var(--teal)">Rewound at ${prevLife.age} — what changed</h3>
       <div class="cmpgrid"><div><small>Earlier life</small><b>${prevLife.letter}</b><span>${money(prevLife.nw)} · happiness ${Math.round(prevLife.happy)} · ${prevLife.dreams} dreams</span></div><div><small>This life</small><b style="color:${better ? 'var(--pos)' : 'var(--neg)'}">${ev.letter}</b><span>${money(ev.nw)} · happiness ${Math.round(players[0].s.happy)} · ${(players[0].dreams || []).filter(id => players[0].dreamState[id] === true).length} dreams</span></div></div>
       <p class="muted" style="margin:8px 0 0">Same luck both times. The difference — ${money(Math.abs(ev.nw - prevLife.nw))} ${better ? 'more' : 'less'} — is only what you did differently from ${prevLife.age} on.</p></div>`;
   }
   players.forEach((p, i) => {
     const ev = evs[i], story = storyFor(p, ev);
     updateDreams(p);
-    const dn = (p.dreams || []).filter(id => p.dreamState[id] === true).length;
-    const callRight = (p.call === 'beat') === (ev.nw >= ev.gnw);
-    if (p.dreams && p.dreams.length) html += `<div class="panel"><h3 class="eyebrow">${players.length > 1 ? p.name + "'s" : 'Your'} dreams · ${dn} of ${p.dreams.length}</h3><div class="dreamsum">${p.dreams.map(id => { const st = p.dreamState[id]; return `<div class="dream ${st === true ? 'done' : st === false ? 'lost' : 'open'}"><i>${st === true ? '✓' : st === false ? '✕' : ''}</i>${DREAMS[id].name}</div>`; }).join('')}</div>
-      <p class="muted" style="margin:10px 0 0">Your call at the start: <b style="color:var(--text)">${p.call === 'beat' ? "I'll beat the ghost" : 'The ghost will beat me'}</b>. ${callRight ? 'You were right.' : 'You were wrong — ' + (ev.nw >= ev.gnw ? 'you beat it.' : 'it beat you.')}</p></div>`;
-    html += `<div class="panel grade"><div class="letter" style="color:${GRADE_COLOR[ev.letter]}">${ev.letter}</div><div><h2 style="color:${players.length > 1 ? COLORS[i] : 'inherit'}">${players.length > 1 ? p.name + ' — ' : ''}${ev.title}</h2>
-      <div class="muted">At ${p.s.retiredAt || RETIRE_AGE} you ${p.s.retiredAt && p.s.retiredAt < RETIRE_AGE ? 'retired early with' : 'had'} ${money(ev.at60.nw)} and a corpus covering ${pct(ev.ready)} of costs. At 85 there is ${money(ev.nw)} left — that's ${money(ev.real)} in age-22 money. The ghost, with the same luck, has ${money(ev.gnw)}.</div></div></div>
-      <div class="cols">
-        <div class="panel"><h3 class="eyebrow">The numbers</h3>
+    tabs.result += `<div class="panel grade"><div class="letter" style="color:${GRADE_COLOR[ev.letter]}">${ev.letter}</div><div><h2 style="color:${players.length > 1 ? COLORS[i] : 'inherit'}">${players.length > 1 ? p.name + ' — ' : ''}${ev.title}</h2>
+      <div class="muted">At ${p.s.retiredAt || RETIRE_AGE} you ${p.s.retiredAt && p.s.retiredAt < RETIRE_AGE ? 'retired early with' : 'had'} ${money(ev.at60.nw)} and a corpus covering ${pct(ev.ready)} of costs. At ${p.s.dead || 85} there is ${money(ev.nw)} left — ${money(ev.real)} in age-22 money. The ghost, with the same luck, has ${money(ev.gnw)}.</div></div></div>`;
+    tabs.result += dreamPanel(p, ev);
+    tabs.result += `<div class="panel"><h3 class="eyebrow">The numbers</h3><div class="numgrid">
           <div class="stat"><span class="k">Retired at</span><span class="v">${p.s.retiredAt || '—'}</span></div>
           <div class="stat"><span class="k">Net worth then</span><span class="v">${money(ev.at60.nw)}</span></div>
           <div class="stat"><span class="k">Corpus then</span><span class="v">${money(ev.corpus)}</span></div>
-          <div class="stat"><span class="k">Readiness then</span><span class="v ${ev.ready >= 1 ? 'pos' : ev.ready >= .7 ? 'warn' : 'neg'}">${pct(ev.ready)} of costs covered</span></div>
+          <div class="stat"><span class="k">Readiness then</span><span class="v ${ev.ready >= 1 ? 'pos' : ev.ready >= .7 ? 'warn' : 'neg'}">${pct(ev.ready)} of costs</span></div>
           ${ev.pension ? `<div class="stat"><span class="k">Pension</span><span class="v">${money(ev.pension)}/yr</span></div>` : ''}
           ${p.s.annuity ? `<div class="stat"><span class="k">Annuity</span><span class="v">${money(p.s.annuity)}/yr, fixed</span></div>` : ''}
           <div class="stat"><span class="k">Lived to</span><span class="v">${p.s.dead || END_AGE}</span></div>
           <div class="stat"><span class="k">Health at the end</span><span class="v">${Math.round(p.s.health)} / 100</span></div>
           <div class="stat"><span class="k">Money ran out</span><span class="v ${p.s.brokeAt ? 'neg' : 'pos'}">${p.s.brokeAt ? 'at ' + p.s.brokeAt : 'never'}</span></div>
-          <div class="stat"><span class="k">Estate left at 85</span><span class="v">${money(ev.nw)}</span></div>
-          <div class="stat"><span class="k">Property at 85</span><span class="v">${(p.s.house || p.s.rentalFlat) ? money(p.s.house + p.s.rentalFlat) : '—'}</span></div>
-          <div class="stat"><span class="k">Income tax paid, lifetime</span><span class="v">${money(p.s.taxPaid)}${p.s.taxSaved > 0 ? ' (80C saved ' + money(p.s.taxSaved) + ')' : ''}</span></div>
+          <div class="stat"><span class="k">Estate left</span><span class="v">${money(ev.nw)}</span></div>
+          <div class="stat"><span class="k">Property at the end</span><span class="v">${(p.s.house || p.s.rentalFlat) ? money(p.s.house + p.s.rentalFlat) : '—'}</span></div>
+          <div class="stat"><span class="k">Income tax, lifetime</span><span class="v">${money(p.s.taxPaid)}${p.s.taxSaved > 0 ? ' (saved ' + money(p.s.taxSaved) + ')' : ''}</span></div>
           <div class="stat"><span class="k">Life satisfaction</span><span class="v">${Math.round(p.s.happy)} / 100</span></div>
-        </div>
-        <div class="panel"><h3 class="eyebrow">What this life taught you</h3>${lessonsFor(p, ev)}</div>
-      </div>
-      <div class="panel story"><h3 style="margin-top:0">The story of ${players.length > 1 ? p.name + "'s" : 'your'} life</h3>${story.map(t => `<p>${t}</p>`).join('')}
-        <button class="ghost" id="copy${i}">Copy story</button> <button class="ghost" id="card${i}">Result card (PNG)</button></div>`;
-    p.storyText = story.join('\n\n');
+        </div></div>`;
     const ach = achievementsFor(p, ev);
-    html += `<div class="panel"><h3 class="eyebrow">Achievements <span style="font-weight:400;letter-spacing:0;text-transform:none">· ${ach.got.length} this life${players.length === 1 ? ', ' + ach.collected + '/' + ach.total + ' all time' : ''}</span></h3>
+    tabs.result += `<div class="panel"><h3 class="eyebrow">Achievements <span style="font-weight:400;letter-spacing:0;text-transform:none">· ${ach.got.length} this life${players.length === 1 ? ', ' + ach.collected + '/' + ach.total + ' all time' : ''}</span></h3>
       <div class="badges">${ACHIEVEMENTS.map(a => { const g = ach.got.includes(a); return `<div class="badge ${g ? 'got' : ''} ${ach.fresh.includes(a.id) ? 'fresh' : ''}"><b>${ach.fresh.includes(a.id) ? '<span class="new">NEW</span>' : ''}${g ? '🏅' : '🔒'} ${a.name}</b><small>${a.desc}</small></div>`; }).join('')}</div></div>`;
+    // ---- story ----
+    tabs.story += `<div class="panel story"><h3>The story of ${players.length > 1 ? p.name + "'s" : 'your'} life</h3>${story.map(t => `<p>${t}</p>`).join('')}
+      <div class="row" style="margin-top:12px"><button class="ghost" id="copy${i}">Copy story</button> <button class="ghost" id="card${i}">Result card (PNG)</button></div></div>`;
+    p.storyText = story.join('\n\n');
+    // ---- lessons: five that matter most, the rest on request ----
+    const les = lessonsFor(p, ev), top = les.slice(0, 5), rest = les.slice(5);
+    tabs.lessons += `<div class="panel"><h3 class="eyebrow">${players.length > 1 ? p.name + ' — what' : 'What'} this life taught you</h3>${top.join('')}${rest.length ? `<div class="hidden" id="more${i}">${rest.join('')}</div><button class="ghost" style="margin-top:8px" id="moreBtn${i}">Show ${rest.length} more</button>` : ''}</div>`;
   });
+  tabs.result += `<div class="panel chartwrap"><div class="legend">${players.map((p, i) => `<span><i style="background:${COLORS[i]}"></i>${p.name}</span>`).join('')}<span><i style="background:var(--ghostc)"></i>Ghost</span>${prevLife ? '<span><i style="background:var(--teal)"></i>Earlier life</span>' : ''}</div><div class="chartbox"><svg id="chartEndSvg" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="ylab"></div><div class="endlab"></div><div class="tip hidden"></div></div><div class="xticks"></div></div>`;
+  // ---- rewind ----
   if (players.length === 1) {
     const p = players[0], list = p.decisions.filter(d => snapshots[d.age]).slice().reverse();
-    html += `<div class="panel"><h3 class="eyebrow">Rewind — live it differently</h3><p class="muted" style="margin:0 0 10px">Go back to any decision. The luck stays exactly the same; only your choices from that point change. Your earlier life stays on the chart.</p>
+    tabs.rewind = `<div class="panel"><h3 class="eyebrow">Rewind — live it differently</h3><p class="muted" style="margin:0 0 10px">Go back to any decision. The luck stays exactly the same; only your choices from that point change. Your earlier life stays on the chart.</p>
       <div class="rewind">${list.map(d => `<button class="ghost" data-age="${d.age}"><b>${d.age}</b> ${d.label}<small>${(CARDS.find(c => c.id === d.id) || { title: d.id }).title.replace(/\{.*?\}/g, '').replace(/^\s*$/, d.id)}</small></button>`).join('')}</div></div>`;
   }
-  html += `<div class="panel chartwrap"><div class="legend">${players.map((p, i) => `<span><i style="background:${COLORS[i]}"></i>${p.name}</span>`).join('')}<span><i style="background:var(--ghostc)"></i>Ghost</span>${prevLife ? '<span><i style="background:var(--teal)"></i>Earlier life</span>' : ''}</div><div class="chartbox"><svg id="chartEndSvg" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="ylab"></div><div class="endlab"></div></div><div class="xticks"></div></div>
-    <div class="row"><button class="primary" id="btnAgain">Live again (new luck)</button><button class="ghost" id="btnReplay">Replay with the same luck</button><button class="ghost" id="btnMenu">Change who you are</button>
-      <span class="muted" style="margin-left:auto">Luck seed <b style="color:var(--text)">${seed}</b> — enter it on the start screen to give someone your exact luck.</span></div>`;
+
+  const names = { result: 'Result', story: 'Story', lessons: 'Lessons', rewind: 'Rewind' };
+  const html = `<div class="tabs" id="endTabs">${Object.keys(tabs).filter(k => tabs[k]).map((k, i) => `<button data-t="${k}" class="${i === 0 ? 'on' : ''}">${names[k]}</button>`).join('')}</div>
+    ${Object.keys(tabs).filter(k => tabs[k]).map((k, i) => `<div class="tabpane ${i === 0 ? '' : 'hidden'}" data-pane="${k}">${tabs[k]}</div>`).join('')}
+    <div class="row endrow"><button class="primary" id="btnAgain">Live again (new luck)</button><button class="ghost" id="btnReplay">Replay with the same luck</button><button class="ghost" id="btnMenu">Change who you are</button></div>`;
   $('end').innerHTML = html;
+  $('endTabs').querySelectorAll('button').forEach(b => b.onclick = () => { $('endTabs').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); $('end').querySelectorAll('.tabpane').forEach(pn => pn.classList.toggle('hidden', pn.dataset.pane !== b.dataset.t)); window.scrollTo(0, 0); });
   players.forEach((p, i) => {
     $('copy' + i).onclick = e => navigator.clipboard.writeText(p.storyText).then(() => e.target.textContent = 'Copied!');
     $('card' + i).onclick = () => downloadCard(p, evs[i]);
+    const mb = $('moreBtn' + i); if (mb) mb.onclick = () => { $('more' + i).classList.remove('hidden'); mb.remove(); };
   });
-  $('btnAgain').onclick = () => startGame(false); $('btnAgainTop').onclick = () => startGame(false);
+  $('btnAgain').onclick = () => startGame(false);
   $('end').querySelectorAll('.rewind button').forEach(b => b.onclick = () => rewindTo(+b.dataset.age));
   $('btnReplay').onclick = () => startGame(true);
   $('btnMenu').onclick = () => { $('end').classList.add('hidden'); $('start').classList.remove('hidden'); window.scrollTo(0, 0); };
@@ -1761,6 +1821,7 @@ $('btnStart').onclick = () => { clearSave(); startGame(false); };
 $('btnResume').onclick = resumeGame;
 $('btnNext').onclick = nextYear;
 $('btnSkip').onclick = skipToDecision;
+$('habitsSum').onclick = () => { habitsOpen = !habitsOpen; render(); };
 $('hintsClose').onclick = () => { try { localStorage.setItem('moneylife.hints', '1'); } catch (e) {} $('hints').classList.add('hidden'); };
 $('lifeSeg').querySelectorAll('button').forEach(b => b.onclick = () => { cur().s.lifestyle = b.dataset.l; render(); });
 $('investPct').oninput = e => { cur().s.investPct = +e.target.value; render(); };
