@@ -368,7 +368,10 @@
     <div class="seg" id="ageSeg">
       <button data-a="22" class="on">22</button><button data-a="25">25</button><button data-a="30">30</button><button data-a="35">35</button><button data-a="40">40</button>
     </div>
-    <div class="hint" id="ageHint" style="margin-top:6px">Starting later means years of salary growth, some savings and EPF already banked — and the early decisions arrive in your first few years.</div>
+    <div class="hint" id="ageHint" style="margin-top:6px">Starting later means a bigger salary, some savings and EPF already banked — in today's money, at today's prices. The early decisions arrive in your first few years.</div>
+    <h3 id="famHead">Family at the start</h3>
+    <div class="seg" id="famSeg"><button data-f="single">Single</button><button data-f="married">Married</button><button data-f="kid">Married, one child</button></div>
+    <div class="hint" id="famHint" style="margin-top:6px"></div>
     <h3>How many players?</h3>
     <div class="seg" id="modeSeg">
       <button data-m="1" class="on">Solo</button>
@@ -596,18 +599,20 @@ function makeDraws(seed) {
 }
 
 // ---------- state ----------
-function newState(personaId = 'grad', startAge) {
+function newState(personaId = 'grad', startAge, family) {
   const P = PERSONAS[personaId]; startAge = startAge || P.startAge || START_AGE;
-  const yrs = startAge - START_AGE;                                            // years already worked
-  const salary = P.custom ? P.salary : P.salary * Math.pow(1 + P.growth + 0.012, yrs);   // raises plus the odd promotion
+  const yrs = startAge - (P.startAge || START_AGE);                            // years worked beyond the persona's own starting age
+  const salary = P.custom ? P.salary : P.salary * Math.pow(1.035, yrs);            // career progression in today's money (raises above inflation, promotions)
+  family = P.custom ? (P.married ? (P.kidsAges ? 'kid' : 'married') : 'single') : (family || (P.kids ? 'single' : startAge >= 30 ? 'kid' : startAge >= 26 ? 'married' : 'single'));
+  const married = family !== 'single', kidsAt = P.kidsAges ? [...P.kidsAges] : P.kids ? [startAge - 2] : family === 'kid' ? [startAge - 4] : [];
   const s = {
     age: startAge, salary, cash: P.custom ? P.cash * 0.4 : P.cash + salary * 0.08 * yrs, equity: P.custom ? P.cash * 0.4 : salary * 0.06 * yrs, gold: 0, fd: P.custom ? P.cash * 0.2 : salary * 0.04 * yrs,
     epf: P.pension ? 0 : salary * 0.07 * yrs * 1.4, ppf: 0, house: 0, rentalFlat: 0,
-    debts: { student: P.custom ? P.loan : Math.max(0, P.loan - 3200 * yrs * 1.3), card: 0, car: 0, school: 0, mortgage: 0, rental: 0, kidloan: 0, personal: 0 },
+    debts: { student: P.custom ? P.loan : Math.max(0, P.loan - salary * 0.12 * yrs), card: 0, car: 0, school: 0, mortgage: 0, rental: 0, kidloan: 0, personal: 0 },   // loan repaid at ~12% of salary a year
     mortgagePay: 0, rentalPay: 0, insured: !!P.insured, termCover: false, coverSince: 0,
-    married: !!P.married, spouseSalary: P.married ? salary * 0.6 : 0, kids: P.kidsAges ? [...P.kidsAges] : P.kids ? [startAge - 2] : [], happy: 55, cost: Math.pow(1 + INFL, startAge - START_AGE),
+    married, spouseSalary: married ? salary * 0.6 : 0, kids: kidsAt, happy: 55, cost: 1,                    // you start today, whatever your age
     cityMult: P.cityMult, scale: P.scale, layoffBase: P.layoff, growth: P.growth, pension: !!P.pension, heir: !!P.heir, personaId,
-    startAge, marriedAt: P.married ? startAge - 3 : 0, health: 80, selfCare: false, dead: 0, retired: false, pensionPay: 0, annuity: 0, partTimeUntil: 0, brokeAt: 0, at60: null, justPromoted: false, yearsFrugal: 0, crashesHeld: 0, nwAt40: 0, debtAt40: null,
+    startAge, marriedAt: married ? startAge - 3 : 0, health: 80, selfCare: false, dead: 0, retired: false, pensionPay: 0, annuity: 0, partTimeUntil: 0, brokeAt: 0, at60: null, justPromoted: false, yearsFrugal: 0, crashesHeld: 0, nwAt40: 0, debtAt40: null,
     nps: 0, npsOn: false, basis: 0, ltcg: 0, ltcgYear: 0, chit: null, coop: null, mlmHit: 0, familyLoan: 0, crunchPlan: null, tenure: 0, parentsSupport: false, gratuity: 0,
     lifestyle: 'normal', investPct: 50, equityPct: 70, goldPct: 10, payDebt: true, c80: true,
     riskyYears: 0, sideIncome: 0, mbaLeft: 0, feeDrag: 0, cosignHit: 0,
@@ -1295,13 +1300,13 @@ function ghostYear(g, d) {
 }
 
 // ---------- game controller ----------
-let players = [], G, draws, seed, cp = 0, mode = 1, personaId = 'grad', startAgeSel = 22, chosenDreams = ['house', 'free55', 'trip'], myCall = 'beat', playerName = '';
+let players = [], G, draws, seed, cp = 0, mode = 1, personaId = 'grad', startAgeSel = 22, familySel = null, chosenDreams = ['house', 'free55', 'trip'], myCall = 'beat', playerName = '';
 const $ = id => document.getElementById(id);
 const cur = () => players[cp];
 const COLORS = ['#f4c95d', '#5cc8e8'];
 
 function makePlayer(name) {
-  const s = newState(personaId, startAgeSel), P = PERSONAS[personaId];
+  const s = newState(personaId, startAgeSel, familySel), P = PERSONAS[personaId];
   return { name, s, pendingCard: null, pickedOpt: null, log: [], decisions: [], dreams: [...chosenDreams], dreamState: {}, call: myCall,
     lastMsgs: [{ t: `Welcome to adulthood. ${P.name}: salary ${money(s.salary)}` + (s.debts.student ? `, education loan ${money(s.debts.student)}` : '') + `, ${money(s.cash)} in the bank.` + (s.kids.length ? ' And a toddler.' : '') + (P.pension ? ' No EPF — a government pension waits at 60.' : ' Your employer deducts EPF from your pay and matches it.'), k: '' }] };
 }
@@ -1335,7 +1340,7 @@ function startGame(sameSeed) {
   if (!sameSeed) seed = typed ? (/^\d+$/.test(typed) ? +typed : hashSeed(typed)) : (Math.random() * 2 ** 31) | 0;
   draws = makeDraws(seed);
   players = mode === 2 ? [makePlayer(playerName ? playerName : 'Player 1'), makePlayer('Player 2')] : [makePlayer(playerName || 'You')];
-  G = newState(personaId, startAgeSel); cp = 0;
+  G = newState(personaId, startAgeSel, familySel); cp = 0;
   $('start').classList.add('hidden'); $('end').classList.add('hidden'); $('game').classList.remove('hidden');
   window.scrollTo(0, 0);
   beginTurn();
@@ -1488,14 +1493,14 @@ async function skipToDecision() {
 // ---------- save & resume ----------
 function saveGame() {
   try {
-    localStorage.setItem('moneylife.save', JSON.stringify({ seed, mode, personaId, startAgeSel, cp, G, you: PERSONAS.you, playerName, players: players.map(p => ({ name: p.name, s: p.s, log: p.log, decisions: p.decisions, lastMsgs: p.lastMsgs })) }));
+    localStorage.setItem('moneylife.save', JSON.stringify({ seed, mode, personaId, startAgeSel, familySel, cp, G, you: PERSONAS.you, playerName, players: players.map(p => ({ name: p.name, s: p.s, log: p.log, decisions: p.decisions, lastMsgs: p.lastMsgs })) }));
   } catch (e) {}
 }
 function clearSave() { try { localStorage.removeItem('moneylife.save'); } catch (e) {} }
 function loadSave() { try { return JSON.parse(localStorage.getItem('moneylife.save') || 'null'); } catch (e) { return null; } }
 function resumeGame() {
   const d = loadSave(); if (!d) return;
-  seed = d.seed; mode = d.mode; personaId = d.personaId; startAgeSel = d.startAgeSel || 22; cp = d.cp; playerName = d.playerName || '';
+  seed = d.seed; mode = d.mode; personaId = d.personaId; startAgeSel = d.startAgeSel || 22; familySel = d.familySel || null; cp = d.cp; playerName = d.playerName || '';
   if (d.you) Object.assign(PERSONAS.you, d.you, { desc: PERSONAS.you.desc });
   draws = makeDraws(seed); G = d.G;
   players = d.players.map(p => ({ ...p, pendingCard: null, pickedOpt: null }));
@@ -1830,9 +1835,18 @@ function endGame() {
 if (typeof document !== 'undefined' && document.getElementById('personas')) {
 $('personas').innerHTML = Object.entries(PERSONAS).map(([id, P]) => `<button data-p="${id}" class="${id === personaId ? 'on' : ''}"><b>${P.name}</b><span class="diff">${P.diff}</span><small>${P.desc()}</small></button>`).join('');
 function refreshPersonas() { $('personas').querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.p === personaId); b.querySelector('small').textContent = PERSONAS[b.dataset.p].desc(); }); }
-$('personas').onclick = e => { const b = e.target.closest('button'); if (b) { personaId = b.dataset.p; refreshPersonas(); if (PERSONAS[personaId].startAge) setStartAge(PERSONAS[personaId].startAge); } };
+$('personas').onclick = e => { const b = e.target.closest('button'); if (b) { personaId = b.dataset.p; refreshPersonas(); if (PERSONAS[personaId].startAge) setStartAge(PERSONAS[personaId].startAge); refreshFamily(); } };
 $('modeSeg').querySelectorAll('button').forEach(b => b.onclick = () => { mode = +b.dataset.m; $('modeSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
-function setStartAge(a) { startAgeSel = a; $('ageSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.a === a)); }
+function setStartAge(a) { startAgeSel = a; $('ageSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.a === a)); refreshFamily(); }
+function refreshFamily() {
+  const P = PERSONAS[personaId], fixed = P.kids || P.custom;
+  const def = P.kids ? 'single' : startAgeSel >= 30 ? 'kid' : startAgeSel >= 26 ? 'married' : 'single';
+  const cur = familySel || def;
+  $('famSeg').querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.f === cur); b.disabled = fixed; });
+  $('famHint').textContent = P.custom ? 'Taken from your numbers above.' : P.kids ? 'Fixed for this start: a single parent with a two-year-old.' : familySel ? '' : `Default for ${startAgeSel}: ${cur === 'kid' ? 'married with a four-year-old' : cur === 'married' ? 'married, no children yet' : 'single'}. Marriage and children are asked in-game either way.`;
+}
+$('famSeg').querySelectorAll('button').forEach(b => b.onclick = () => { if (b.disabled) return; familySel = b.dataset.f; refreshFamily(); });
+refreshFamily();
 $('ageSeg').querySelectorAll('button').forEach(b => b.onclick = () => setStartAge(+b.dataset.a));
 $('btnStart').onclick = () => { clearSave(); startGame(false); };
 $('btnResume').onclick = resumeGame;
