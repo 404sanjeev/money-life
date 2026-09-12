@@ -481,12 +481,12 @@
           <input type="range" id="goldPct" min="0" max="100" step="10" value="10" title="Gold share" aria-label="Gold share of investments">
           <div class="alloc"><i class="eq" id="alEq"></i><i class="gd" id="alGd"></i><i class="fd" id="alFd"></i></div>
           <div class="alloc-key"><span><i style="background:var(--gold)"></i>Equity</span><span><i style="background:#e0a53a"></i>Gold</span><span><i style="background:var(--teal)"></i>FD</span></div>
-          <div class="hint">Equity MFs ~10% avg, wild swings. Gold ~7%, bumpy. FDs 6.5%, steady.</div>
+          <div class="hint">Equity MFs ~13% avg, wild swings. Gold ~10%, bumpy. FDs 6.5%, steady. Inflation runs 5%.</div>
         </div>
         <div class="ctl">
           <label>Tax, debt &amp; body</label>
           <label class="toggle"><input type="checkbox" id="selfCare"> Look after yourself — <span id="careLabel"></span>/yr on gym, checkups, decent food</label>
-          <label class="toggle"><input type="checkbox" id="c80" checked> Max out 80C — <span id="c80Label"></span>/yr into PPF/ELSS</label>
+          <label class="toggle"><input type="checkbox" id="c80" checked> Max out 80C — <span id="c80Label"></span>/yr into PPF (15-year term, then reachable)</label>
           <label class="toggle"><input type="checkbox" id="nps"> NPS — <span id="npsLabel"></span>/yr extra deduction, locked till 60</label>
           <label class="toggle"><input type="checkbox" id="payDebt" checked> Prepay expensive loans once 3 months' cash is set aside</label>
           <div class="hint">80C cuts your taxable income. Credit card is 24% — nothing beats paying that off. Cheap loans (education 6%, home 6%, MBA 7%) just run their course.</div>
@@ -527,7 +527,9 @@
    ===================================================================== */
 
 const START_AGE = 22, END_AGE = 85, RETIRE_AGE = 60;
-const INFL = 0.03;
+const INFL = 0.05;                             // general inflation; medical runs ~5 points above it
+const GRATUITY_CAP = 1666667;                  // ₹20 L
+const gratuityOf = s => Math.min(GRATUITY_CAP, s.salary * 0.30 / 12 * 15 / 26 * s.tenure);   // 15/26 × monthly basic (30% of salary) × years, per the Act
 const BASE_COST = 32000;                       // "normal" lifestyle, age 22, single: about ₹32k a month in a metro
 const LIFE = {                                 // cost multiplier, yearly happiness
   frugal: { m: 0.80, h: -1,   label: 'Frugal', hint: 'PG room, cook at home, no Swiggy. Saves a lot, wears on you.' },
@@ -537,19 +539,19 @@ const LIFE = {                                 // cost multiplier, yearly happin
 };
 // Starting lives. Money in internal units (₹ = ×12). desc() re-renders in the chosen currency.
 const PERSONAS = {
-  grad:   { name: 'Fresh graduate', diff: 'Normal', salary: 50000, loan: 25000, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035,
+  grad:   { name: 'Fresh graduate', diff: 'Normal', salary: 50000, loan: 25000, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: INFL + 0.02,
             desc: () => `${money(50000)} salary · ${money(25000)} loan · metro · the default life` },
-  tier2:  { name: 'Tier-2 hustler', diff: 'Hard', salary: 20000, loan: 0, cash: 1000, cityMult: 0.7, scale: 0.5, layoff: 0.05, growth: 0.04,
+  tier2:  { name: 'Tier-2 hustler', diff: 'Hard', salary: 20000, loan: 0, cash: 1000, cityMult: 0.7, scale: 0.5, layoff: 0.05, growth: INFL + 0.025,
             desc: () => `${money(20000)} salary · no loan · small city · no degree, slower ladder` },
-  topper: { name: 'IIT / IIM topper', diff: 'Easy money, hard life', salary: 150000, loan: 165000, cash: 5000, cityMult: 1.3, scale: 1.6, layoff: 0.07, growth: 0.03,
+  topper: { name: 'IIT / IIM topper', diff: 'Easy money, hard life', salary: 150000, loan: 165000, cash: 5000, cityMult: 1.3, scale: 1.6, layoff: 0.07, growth: INFL + 0.015,
             desc: () => `${money(150000)} salary · ${money(165000)} loan · Bangalore · tech layoffs, expensive tastes` },
-  govt:   { name: 'Government officer', diff: 'Easy', salary: 35000, loan: 10000, cash: 2000, cityMult: 0.9, scale: 0.85, layoff: 0, growth: 0.03, pension: true,
+  govt:   { name: 'Government officer', diff: 'Easy', salary: 35000, loan: 10000, cash: 2000, cityMult: 0.9, scale: 0.85, layoff: 0, growth: INFL + 0.01, pension: true,
             desc: () => `${money(35000)} salary · ${money(10000)} loan · state capital · no layoffs, pension at 60` },
-  heir:   { name: 'Family business heir', diff: 'Normal', salary: 30000, loan: 0, cash: 400000, cityMult: 1.0, scale: 1.0, layoff: 0.07, growth: 0.025, heir: true,
+  heir:   { name: 'Family business heir', diff: 'Normal', salary: 30000, loan: 0, cash: 400000, cityMult: 1.0, scale: 1.0, layoff: 0.07, growth: INFL, heir: true,
             desc: () => `${money(30000)} from the shop · no loan · ${money(400000)} in the bank · bad years happen` },
-  you:    { name: 'Yourself', diff: 'Your numbers', custom: true, salary: 50000, loan: 0, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035,
+  you:    { name: 'Yourself', diff: 'Your numbers', custom: true, salary: 50000, loan: 0, cash: 2000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: INFL + 0.02,
             desc: () => 'your salary · your loans · your savings · your family' },
-  parent: { name: 'Single parent', diff: 'Hard', salary: 70000, loan: 0, cash: 10000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: 0.035, startAge: 30, kids: [28], insured: true,
+  parent: { name: 'Single parent', diff: 'Hard', salary: 70000, loan: 0, cash: 10000, cityMult: 1.0, scale: 1.0, layoff: 0.04, growth: INFL + 0.02, startAge: 30, kids: [28], insured: true,
             desc: () => `${money(70000)} salary · no loan · metro · starts at 30 with a two-year-old, no partner` },
 };
 const RATES = { student: 0.06, card: 0.24, car: 0.09, school: 0.07, mortgage: 0.06, rental: 0.085, kidloan: 0.09, personal: 0.14 };
@@ -561,9 +563,10 @@ const SLABS = [[25000, 0], [58333, 0.05], [83333, 0.10], [100000, 0.15], [125000
 const STD_DED = 6250;                          // ₹75,000 standard deduction
 const C80_MAX = 12500;                         // ₹1.5 L
 const TERM_COVER = 1e7 / 12;                   // ₹1 Cr
-function incomeTax(taxable) {
+// Slabs are revised roughly with inflation over the years (idx = price index at that time); the 80C and NPS limits are not.
+function incomeTax(taxable, idx = 1) {
   let t = 0, prev = 0;
-  for (const [lim, r] of SLABS) { if (taxable > prev) t += (Math.min(taxable, lim) - prev) * r; prev = lim; if (taxable <= lim) break; }
+  for (const [lim0, r] of SLABS) { const lim = lim0 * idx; if (taxable > prev) t += (Math.min(taxable, lim) - prev) * r; prev = lim; if (taxable <= lim) break; }
   return t * 1.04;
 }
 
@@ -593,7 +596,7 @@ function gaussian(rng) { let u = 0, v = 0; while (u === 0) u = rng(); while (v =
 function makeDraws(seed) {
   const rng = mulberry32(seed), d = [];
   for (let a = START_AGE; a <= END_AGE; a++) {
-    d.push({ ret: Math.max(-0.5, 0.10 + 0.18 * gaussian(rng)), gold: Math.max(-0.3, 0.07 + 0.12 * gaussian(rng)), hazard: rng(), event: rng(), gamble: rng(), family: rng() });
+    d.push({ ret: Math.max(-0.5, 0.13 + 0.19 * gaussian(rng)), gold: Math.max(-0.3, 0.10 + 0.14 * gaussian(rng)), hazard: rng(), event: rng(), gamble: rng(), family: rng() });
   }
   return d;
 }
@@ -607,7 +610,7 @@ function newState(personaId = 'grad', startAge, family) {
   const married = family !== 'single', kidsAt = P.kidsAges ? [...P.kidsAges] : P.kids ? [startAge - 2] : family === 'kid' ? [startAge - 4] : [];
   const s = {
     age: startAge, salary, cash: P.custom ? P.cash * 0.4 : P.cash + salary * 0.08 * yrs, equity: P.custom ? P.cash * 0.4 : salary * 0.06 * yrs, gold: 0, fd: P.custom ? P.cash * 0.2 : salary * 0.04 * yrs,
-    epf: P.pension ? 0 : salary * 0.07 * yrs * 1.4, ppf: 0, house: 0, rentalFlat: 0,
+    epf: P.pension ? 0 : salary * 0.07 * yrs * 1.4, ppf: 0, ppfStart: 0, ppfDrawn: 0, house: 0, rentalFlat: 0,
     debts: { student: P.custom ? P.loan : Math.max(0, P.loan - salary * 0.12 * yrs), card: 0, car: 0, school: 0, mortgage: 0, rental: 0, kidloan: 0, personal: 0 },   // loan repaid at ~12% of salary a year
     mortgagePay: 0, rentalPay: 0, insured: !!P.insured, termCover: false, coverSince: 0,
     married, spouseSalary: married ? salary * 0.6 : 0, kids: kidsAt, happy: 55, cost: 1,                    // you start today, whatever your age
@@ -682,9 +685,11 @@ function sellInv(s, need) {
   const g = Math.min(gross, s.gold); s.gold -= g; s.equity -= gross - g;
   s.basis *= eg > 0 ? (eg - gross) / eg : 0;
   s.ltcg += tax; s.ltcgYear += tax; s.sold += gross;
-  return Math.max(0, need - (gross - tax));
+  need = Math.max(0, need - (gross - tax));
+  if (need > 0 && s.ppfStart && s.age - s.ppfStart >= 15 && s.ppf > 0) { const w = Math.min(need, s.ppf); s.ppf -= w; need -= w; s.sold += w; s.ppfDrawn = (s.ppfDrawn || 0) + w; }   // matured PPF: last resort
+  return need;
 }
-// Spend money: savings account first, then investments; whatever's left goes on the credit card. EPF/PPF/NPS are locked.
+// Spend money: savings account first, then investments, then matured PPF; whatever's left goes on the credit card. EPF, NPS and an unmatured PPF are locked.
 function pay(s, amt) {
   s.cash -= amt; if (s.cash >= 0) return false;
   const need = sellInv(s, -s.cash); s.cash = 0;
@@ -747,9 +752,9 @@ const CARDS = [
     ], ghost: 0, ghostFallback: 1 },
 
   { age: 31, id: 'hop31', when: s => !s.retired, title: 'Rival offer: +18%', text: '{t} years at your current job — {g}.',
-    vars: s => ({ t: s.tenure, g: s.tenure >= 5 ? 'leaving pays out ' + money(s.salary / 24 * Math.min(s.tenure, 20)) + ' gratuity' : 'no gratuity yet, it vests at 5' }),
+    vars: s => ({ t: s.tenure, g: s.tenure >= 5 ? 'leaving pays out ' + money(gratuityOf(s)) + ' gratuity' : 'no gratuity yet, it vests at 5' }),
     opts: [
-      { label: 'Take it', sub: 'Tenure resets', apply: s => { if (s.tenure >= 5) { const g = s.salary / 24 * Math.min(s.tenure, 20); s.cash += g; } s.salary *= 1.18; s.tenure = 0; return 'Hopped jobs for +18%.'; } },
+      { label: 'Take it', sub: 'Tenure resets', apply: s => { if (s.tenure >= 5) s.cash += gratuityOf(s); s.salary *= 1.18; s.tenure = 0; return 'Hopped jobs for +18%.'; } },
       { label: 'Stay', sub: '', apply: s => 'Stayed loyal to the employer.' },
     ], ghost: 1 },
 
@@ -810,9 +815,9 @@ const CARDS = [
     ], ghost: 0 },
 
   { age: 47, id: 'hop47', when: s => !s.retired, title: 'One last offer: +18%', text: '{t} years of tenure — {g}. Thirteen years to retirement.',
-    vars: s => ({ t: s.tenure, g: s.tenure >= 5 ? 'leaving pays out ' + money(s.salary / 24 * Math.min(s.tenure, 20)) + ' gratuity' : 'leaving forfeits gratuity' }),
+    vars: s => ({ t: s.tenure, g: s.tenure >= 5 ? 'leaving pays out ' + money(gratuityOf(s)) + ' gratuity' : 'leaving forfeits gratuity' }),
     opts: [
-      { label: 'Take it', sub: 'Tenure resets; less gratuity at 60', apply: s => { if (s.tenure >= 5) s.cash += s.salary / 24 * Math.min(s.tenure, 20); s.salary *= 1.18; s.tenure = 0; return 'Hopped jobs at 47 for +18%.'; } },
+      { label: 'Take it', sub: 'Tenure resets; less gratuity at 60', apply: s => { if (s.tenure >= 5) s.cash += gratuityOf(s); s.salary *= 1.18; s.tenure = 0; return 'Hopped jobs at 47 for +18%.'; } },
       { label: 'Stay till retirement', sub: '', apply: s => 'Stayed till retirement.' },
     ], ghost: 1 },
 
@@ -1071,16 +1076,17 @@ function simulateYear(s, d) {
   const epfEmp = s.pension ? 0 : own * 0.035;                  // ~12% of basic pay; employer adds about the same to EPF (rest goes to pension)
   s.epf += epfEmp * 2;
   const rentalIncome = s.rentalFlat * 0.03;
-  const spouseTax = incomeTax(Math.max(0, spouse - STD_DED));
-  const taxable0 = Math.max(0, own - epfEmp - STD_DED);
-  const pre = own + spouse + s.sideIncome + rentalIncome - epfEmp - incomeTax(taxable0) - spouseTax - costs - hit - mins;
+  const spouseTax = incomeTax(Math.max(0, spouse - STD_DED * s.cost), s.cost);
+  const taxable0 = Math.max(0, own - epfEmp - STD_DED * s.cost);
+  const pre = own + spouse + s.sideIncome + rentalIncome - epfEmp - incomeTax(taxable0, s.cost) - spouseTax - costs - hit - mins;
   const c80 = s.c80 ? Math.min(C80_MAX, Math.max(0, pre), taxable0) : 0;
   const nps = s.npsOn ? Math.min(NPS_MAX, Math.max(0, pre - c80), Math.max(0, taxable0 - c80)) : 0;
   const taxable = Math.max(0, taxable0 - c80 - nps);
-  const tax = incomeTax(taxable) + spouseTax;
-  const saved = incomeTax(taxable0) - incomeTax(taxable);
+  const tax = incomeTax(taxable, s.cost) + spouseTax;
+  const saved = incomeTax(taxable0, s.cost) - incomeTax(taxable, s.cost);
   s.taxPaid += tax; s.taxSaved += saved;
-  s.ppf += c80; s.nps += nps;
+  s.ppf += c80; s.nps += nps; if (c80 > 0 && !s.ppfStart) s.ppfStart = s.age;
+  if (s.ppfStart && s.age - s.ppfStart === 15) msgs.push({ t: 'Your PPF completed its 15-year term: ' + money(s.ppf) + '. It keeps earning 7.1% tax-free, and from now on it is reachable in an emergency.', k: 'pos' });
   const takehome = own + spouse + s.sideIncome + rentalIncome - epfEmp - tax - c80 - nps;
   msgs.push({ t: 'Paid ' + money(tax) + ' income tax.', k: '' });
   if (c80 + nps > 0) msgs.push({ t: 'Put ' + money(c80 + nps) + ' into ' + (nps > 0 ? 'PPF + NPS' : 'PPF') + ', saving ' + money(saved) + ' tax.', k: 'pos' });
@@ -1117,7 +1123,7 @@ function simulateYear(s, d) {
   // --- markets ---
   const ret = d.ret - s.feeDrag;
   s.equity *= 1 + ret; s.gold *= 1 + d.gold - s.feeDrag; s.fd *= 1.065 - s.feeDrag;
-  s.cash *= 1.03; s.epf *= 1.081; s.ppf *= 1.071; s.nps *= 1.09; s.house *= 1.04; s.rentalFlat *= 1.04;
+  s.cash *= 1.03; s.epf *= 1.0825; s.ppf *= 1.071; s.nps *= 1.10; s.house *= 1.07; s.rentalFlat *= 1.07;
   const tot = s.equity + s.gold + s.fd;
   if (tot > 0) { s.equity = tot * s.equityPct / 100; s.gold = tot * s.goldPct / 100; s.fd = tot - s.equity - s.gold; }
   s.lastRet = d.ret;
@@ -1138,7 +1144,7 @@ function simulateYear(s, d) {
 
   // --- growth & happiness ---
   const nwBefore = s.history[s.history.length - 1];
-  s.salary *= 1 + s.growth; s.spouseSalary *= 1.035; s.cost *= 1 + INFL;
+  s.salary *= 1 + s.growth; s.spouseSalary *= 1 + INFL + 0.01; s.cost *= 1 + INFL;
   if (s.mbaLeft > 0 && --s.mbaLeft === 0) { s.salary *= 1.3; msgs.push({ t: 'MBA done. Salary +30%.', k: 'pos' }); }
   s.happy += L.h - 0.5;                                        // life is wearing; you have to feed happiness
   if (s.debts.card > 1000) s.happy -= 2;
@@ -1181,7 +1187,7 @@ function retire(s, msgs) {
   s.epfAt60 = s.epf; s.ppfAt60 = s.ppf; s.npsAt60 = s.nps;
   s.fd += lump; s.epf = 0; s.ppf = 0;
   if (s.nps > 0) { const lumpShare = early ? 0.2 : 0.6; s.fd += s.nps * lumpShare; s.annuity += s.nps * (1 - lumpShare) * 0.065; msgs.push({ t: 'NPS ' + (early ? 'exited early' : 'matured') + ' at ' + money(s.nps) + ': ' + Math.round(lumpShare * 100) + '% paid out, the rest became an annuity of ' + money(s.nps * (1 - lumpShare) * 0.065) + '/yr.', k: early ? 'warn' : 'pos' }); s.nps = 0; }
-  if (!s.pension && s.tenure >= 5) { s.gratuity = Math.min(s.salary / 24 * Math.min(s.tenure, 20), 166667); s.cash += s.gratuity; msgs.push({ t: 'Gratuity for ' + s.tenure + ' years with your last employer: ' + money(s.gratuity) + '.', k: 'pos' }); }
+  if (!s.pension && s.tenure >= 5) { s.gratuity = gratuityOf(s); s.cash += s.gratuity; msgs.push({ t: 'Gratuity for ' + s.tenure + ' years with your last employer: ' + money(s.gratuity) + '.', k: 'pos' }); }
   s.sideIncome *= 0.5;
   const P = PERSONAS[s.personaId];
   s.pensionPay = P.pension ? s.salary * 0.5 * (early ? Math.max(0.5, 1 - (RETIRE_AGE - s.age) * 0.04) : 1) : 0;
@@ -1199,7 +1205,7 @@ function retiredYear(s, d) {
   // income
   const partTime = s.partTimeUntil > s.age ? s.salary * 0.4 : 0;
   const income = s.pensionPay + s.annuity + partTime + s.rentalFlat * 0.03 + s.sideIncome;
-  const tax = incomeTax(Math.max(0, s.pensionPay + s.annuity + partTime + s.sideIncome - STD_DED));
+  const tax = incomeTax(Math.max(0, s.pensionPay + s.annuity + partTime + s.sideIncome - STD_DED * s.cost), s.cost);
   s.taxPaid += tax;
   // costs and shocks
   const costs = retiredCosts(s);
@@ -1228,7 +1234,7 @@ function retiredYear(s, d) {
   }
   // markets
   const ret = d.ret - s.feeDrag;
-  s.equity *= 1 + ret; s.gold *= 1 + d.gold - s.feeDrag; s.fd *= 1.065 - s.feeDrag; s.cash *= 1.03; s.house *= 1.04; s.rentalFlat *= 1.04;
+  s.equity *= 1 + ret; s.gold *= 1 + d.gold - s.feeDrag; s.fd *= 1.065 - s.feeDrag; s.cash *= 1.03; s.ppf *= 1.071; s.house *= 1.07; s.rentalFlat *= 1.07;
   const tot = s.equity + s.gold + s.fd;
   if (tot > 0) { s.equity = tot * s.equityPct / 100; s.gold = tot * s.goldPct / 100; s.fd = tot - s.equity - s.gold; }
   s.lastRet = d.ret;

@@ -43,12 +43,14 @@ const PICKS = {
   sensible: { insure: 0, car: 2, crypto: 1, marry: 0, job: 1, term: 0, house: 0, kid: s => s.kids.length ? 1 : 0, chit: 1, mba: 1, mlm: 1, vacation: 1, rental: 1, coop: 1, side: 1, parents: 0, cosign: 1, adviser: 1, glide: 0, dreamcar: 1, downsize: 0, crash: 1, college: 0, wedding: 1, hike: 1, retire: 0, kidhouse: 1, move: 1, crunch: 0, hop31: 1, hop47: 1, early: 2 },
   family:   { insure: 0, car: 0, crypto: 1, marry: 1, job: 1, term: 0, house: 0, kid: 0, chit: 0, mba: 1, mlm: 1, vacation: 0, rental: 0, coop: 1, side: 1, parents: 0, cosign: 1, adviser: 1, glide: 0, dreamcar: 0, downsize: 1, crash: 1, college: 1, wedding: 0, hike: 0, retire: 1, kidhouse: 0, move: 1, crunch: 1, hop31: 0, hop47: 1, early: 2 },
   yolo:     { insure: 1, car: 0, crypto: 0, marry: 1, job: 0, term: 1, house: 0, kid: 0, chit: 0, mba: 0, mlm: 0, vacation: 0, rental: 0, coop: 0, side: 0, parents: 1, cosign: 0, adviser: 0, glide: 2, dreamcar: 0, downsize: 1, crash: 0, college: 1, wedding: 0, hike: 0, retire: 1, kidhouse: 0, move: 1, crunch: 1, hop31: 0, hop47: 0, early: 0 },
+  careful:  { insure: 0, car: 2, crypto: 1, marry: 0, job: 1, term: 0, house: 0, kid: 0, chit: 1, mba: 1, mlm: 1, vacation: 0, rental: 1, coop: 1, side: 1, parents: 0, cosign: 1, adviser: 1, glide: 0, dreamcar: 1, downsize: 0, crash: 1, college: 0, wedding: 1, hike: 1, retire: 0, kidhouse: 1, move: 1, crunch: 0, hop31: 0, hop47: 1, early: 2 },
   early:    { insure: 0, car: 2, crypto: 1, marry: 0, job: 1, term: 0, house: 1, kid: 1, chit: 1, mba: 1, mlm: 1, vacation: 1, rental: 1, coop: 1, side: 1, parents: 0, cosign: 1, adviser: 1, glide: 0, dreamcar: 1, downsize: 0, crash: 1, college: 0, wedding: 1, hike: 1, retire: 0, kidhouse: 1, move: 1, crunch: 0, hop31: 0, hop47: 1, early: 0 },
 };
 const HABITS = {
   sensible: { lifestyle: 'normal', investPct: 75, equityPct: 70, goldPct: 10, payDebt: true, c80: true, npsOn: true, selfCare: true },
   family:   { lifestyle: 'normal', investPct: 60, equityPct: 60, goldPct: 10, payDebt: true, c80: true, npsOn: false, selfCare: false },
   yolo:     { lifestyle: 'lavish', investPct: 20, equityPct: 100, goldPct: 0, payDebt: false, c80: false, npsOn: false, selfCare: false },
+  careful:  { lifestyle: 'normal', investPct: 60, equityPct: 60, goldPct: 10, payDebt: true, c80: true, npsOn: false, selfCare: true },
   early:    { lifestyle: 'frugal', investPct: 90, equityPct: 80, goldPct: 10, payDebt: true, c80: true, npsOn: true, selfCare: true },
 };
 
@@ -109,6 +111,7 @@ function scenario(name, persona, startAge, policy, expect) {
 
 scenario('grad · textbook', 'grad', 22, 'sensible', { good: [0.7, 1], broke: [0, 0.1] });
 scenario('grad · normal family', 'grad', 22, 'family', { bad: [0.1, 0.9] });
+scenario('grad · careful, two kids', 'grad', 22, 'careful', { good: [0.3, 1], broke: [0, 0.5] });
 scenario('grad · lavish yolo', 'grad', 22, 'yolo', { bad: [0.7, 1] });
 scenario('grad · frugal early-retire', 'grad', 22, 'early', { early: [0.3, 1], broke: [0, 0.4] });
 scenario('tier2 · textbook', 'tier2', 22, 'sensible', { good: [0.3, 1] });
