@@ -528,7 +528,7 @@
 
 const START_AGE = 22, END_AGE = 85, RETIRE_AGE = 60;
 const INFL = 0.03;
-const BASE_COST = 30000;                       // "normal" lifestyle, age 22, single
+const BASE_COST = 32000;                       // "normal" lifestyle, age 22, single: about ₹32k a month in a metro
 const LIFE = {                                 // cost multiplier, yearly happiness
   frugal: { m: 0.80, h: -1,   label: 'Frugal', hint: 'PG room, cook at home, no Swiggy. Saves a lot, wears on you.' },
   normal: { m: 1.00, h:  0,   label: 'Normal', hint: 'Average everything.' },
@@ -659,12 +659,12 @@ const totalDebt = s => Object.values(s.debts).reduce((a, b) => a + b, 0);
 const netWorth = s => liquid(s) + locked(s) + s.house + s.rentalFlat - totalDebt(s);
 const household = s => s.salary + s.spouseSalary;
 const creep = s => Math.pow(Math.max(0.5, household(s) / (50000 * s.cost * (s.married ? 1.6 : 1))), 0.8);   // lifestyle inflation as income rises (per household)
-function livingBase(s) { return BASE_COST * s.cost * s.cityMult * LIFE[s.lifestyle].m * creep(s) * (s.married ? 1.45 : 1); }
+function livingBase(s) { return BASE_COST * s.cost * s.cityMult * LIFE[s.lifestyle].m * creep(s) * (s.married ? 1.5 : 1); }
 const rentOf = s => livingBase(s) * 0.35;
 function yearlyCosts(s) {
   let c = livingBase(s);
   if (s.house > 0) c = c * 0.65 + s.house * 0.012;             // no rent, but upkeep + property tax
-  for (const b of s.kids) if (s.age < b + 22) c += 10000 * s.cost;
+  for (const b of s.kids) if (s.age < b + 22) c += 11500 * s.cost * s.scale;   // school, classes, doctors, clothes: ~₹11.5k a month per child, scaled to your world
   if (s.insured) c += 1800 * s.cost * Math.pow(1.03, s.age - START_AGE);   // premiums outrun inflation
   if (s.parentsSupport && s.age < 62) c += 4000 * s.cost * s.scale;
   if (s.termCover) c += 1000 * s.cost;
@@ -877,7 +877,7 @@ const CARDS = [
 const MARRY_AGES = [26, 29, 32, 35, 38, 41];
 const MARRY_CARD = {
   id: 'marry', title: 'Marriage?',
-  text: '{lead} They earn {sp}/yr. Two incomes, one rent, costs up about 45%. Then the wedding.',
+  text: '{lead} They earn {sp}/yr. Two incomes, one rent, costs up about 50%. Then the wedding.',
   vars: s => ({
     lead: s.age <= 27 ? 'You\'ve met someone.' : s.age <= 30 ? 'Someone serious this time.' : s.age <= 33 ? 'Your parents have started asking.' : s.age <= 36 ? 'The rishta calls have begun.' : s.age <= 39 ? 'Most of your friends are married now.' : 'This is the last time it comes up.',
     sp: money(s.salary * 0.6), m: money(25000 * s.cost * s.scale), g: money(80000 * s.cost * s.scale) }),
@@ -892,7 +892,7 @@ const KID_CARD = {
   vars: s => ({
     t: s.kids.length ? 'A second child?' : 'A child?',
     lead: s.kids.length ? 'Your first is ' + (s.age - s.kids[0]) + '.' : s.age - (s.marriedAt || s.age) <= 2 ? 'Two years married.' : s.age >= 38 ? 'Time is getting shorter.' : 'The question comes up again.',
-    k: money(10000 * s.cost * s.scale), tail: s.kids.length ? ' Your costs are already ' + money(yearlyCosts(s)) + '/yr.' : ' Also: joy.' }),
+    k: money(11500 * s.cost * s.scale), tail: s.kids.length ? ' Your costs are already ' + money(yearlyCosts(s)) + '/yr.' : ' Also: joy.' }),
   opts: [
     { label: 'Yes', sub: '', apply: s => { s.kids.push(s.age); s.happy += s.kids.length === 1 ? 12 : 8; return s.kids.length === 1 ? 'Welcomed your first child.' : 'Welcomed your second child.'; } },
     { label: 'Not now', sub: '', apply: s => s.age >= 40 ? (s.kids.length ? 'Stopped at one child.' : 'Decided against children.') : 'Not now for a child.' },
